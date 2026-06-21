@@ -32,6 +32,13 @@
   --score-low: #E87878; --score-mid: #F0A860; --score-high: #78B89A;
   --bg-soft: #FFF8F2;
 }
+body.dark::before { opacity:.18; background-image:
+  radial-gradient(circle at 10% 8%, rgba(200,180,160,.18) 0.8px, transparent 0.8px),
+  radial-gradient(circle at 25% 15%, rgba(200,180,160,.14) 1.2px, transparent 1.2px),
+  radial-gradient(circle at 42% 5%, rgba(200,180,160,.12) 0.6px, transparent 0.6px),
+  radial-gradient(circle at 58% 12%, rgba(200,180,160,.16) 1px, transparent 1px),
+  radial-gradient(circle at 72% 8%, rgba(200,180,160,.1) 1.4px, transparent 1.4px),
+  radial-gradient(circle at 88% 18%, rgba(200,180,160,.14) 0.7px, transparent 0.7px); background-size:200px 200px; }
 body.dark {
   --bg: #1E1B1A; --card: #282422; --border: #3D3630;
   --text: #E5DDD5; --muted: #9B8E80; --accent: #F0A878;
@@ -48,7 +55,32 @@ body.dark {
 }
 * { margin:0; padding:0; box-sizing:border-box; }
 html { scroll-behavior:smooth; }
-body { font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif; background:var(--bg); color:var(--text); line-height:1.65; transition:background .3s,color .3s; }
+/* 盐粒波点背景 */
+body::before { content:''; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.35;
+  background-image:
+    radial-gradient(circle at 10% 8%, rgba(180,160,140,.25) 0.8px, transparent 0.8px),
+    radial-gradient(circle at 25% 15%, rgba(180,160,140,.2) 1.2px, transparent 1.2px),
+    radial-gradient(circle at 42% 5%, rgba(180,160,140,.18) 0.6px, transparent 0.6px),
+    radial-gradient(circle at 58% 12%, rgba(180,160,140,.22) 1px, transparent 1px),
+    radial-gradient(circle at 72% 8%, rgba(180,160,140,.15) 1.4px, transparent 1.4px),
+    radial-gradient(circle at 88% 18%, rgba(180,160,140,.2) 0.7px, transparent 0.7px),
+    radial-gradient(circle at 15% 25%, rgba(180,160,140,.18) 0.9px, transparent 0.9px),
+    radial-gradient(circle at 35% 22%, rgba(180,160,140,.25) 0.5px, transparent 0.5px),
+    radial-gradient(circle at 52% 28%, rgba(180,160,140,.15) 1.3px, transparent 1.3px),
+    radial-gradient(circle at 68% 20%, rgba(180,160,140,.2) 0.8px, transparent 0.8px),
+    radial-gradient(circle at 80% 30%, rgba(180,160,140,.22) 1.1px, transparent 1.1px),
+    radial-gradient(circle at 5% 38%, rgba(180,160,140,.15) 1.5px, transparent 1.5px),
+    radial-gradient(circle at 30% 35%, rgba(180,160,140,.2) 0.6px, transparent 0.6px),
+    radial-gradient(circle at 48% 42%, rgba(180,160,140,.18) 1px, transparent 1px),
+    radial-gradient(circle at 65% 38%, rgba(180,160,140,.25) 0.7px, transparent 0.7px),
+    radial-gradient(circle at 85% 45%, rgba(180,160,140,.15) 1.2px, transparent 1.2px),
+    radial-gradient(circle at 18% 50%, rgba(180,160,140,.2) 0.9px, transparent 0.9px),
+    radial-gradient(circle at 40% 55%, rgba(180,160,140,.18) 1.4px, transparent 1.4px),
+    radial-gradient(circle at 60% 48%, rgba(180,160,140,.22) 0.5px, transparent 0.5px),
+    radial-gradient(circle at 75% 55%, rgba(180,160,140,.15) 1.1px, transparent 1.1px);
+  background-size: 200px 200px;
+}
+body { position:relative; z-index:1; font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif; background:var(--bg); color:var(--text); line-height:1.65; transition:background .3s,color .3s; }
 
 .logo-wrap { margin-bottom:12px; position:relative; z-index:1; }
 .logo-pineapple { filter:drop-shadow(0 4px 8px rgba(240,150,100,.25)); }
