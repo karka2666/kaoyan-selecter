@@ -982,10 +982,12 @@ function calcScore(school, self) {
   else if(self.time==='半职') ts=school.s.indexOf('大综合')>=0?10:13;
   else if(self.time==='在职') ts=school.s.indexOf('大综合')>=0?4:8;
   total += ts;
-  var score = Math.round(total);
-  if(self.risk==='冲名校' && (school.t==='985'||school.t==='211')) score = Math.min(100, score+8);
-  if(self.risk==='上岸就行' && (school.t==='985'||school.t==='211')) score = Math.max(0, score-5);
-  if(self.risk==='上岸就行' && school.t==='双非') score = Math.min(100, score+5);
+  var tierS=tierScore, engS=engScore, scopeS=scopeScore, qtypeS=qtypeScore, timeS=timeScore;
+  var score = Math.round(total), riskAdj=0;
+  if(self.risk==='冲名校' && (school.t==='985'||school.t==='211')) {riskAdj=8;score=Math.min(100,score+8);}
+  if(self.risk==='上岸就行' && (school.t==='985'||school.t==='211')) {riskAdj=-5;score=Math.max(0,score-5);}
+  if(self.risk==='上岸就行' && school.t==='双非') {riskAdj=5;score=Math.min(100,score+5);}
+  school._detail={tier:tierS,eng:engS,scope:scopeS,qtype:qtypeS,time:timeS,risk:riskAdj,total:score};
   return score;
 }
 
@@ -1448,6 +1450,7 @@ function renderCards(schools) {
           '<div>🗑️ <strong>复试淘汰：</strong>'+(s.reject==='低'?'🟢<20%':s.reject==='中'?'🟡20-40%':s.reject==='高'?'🔴>40%':'❓')+'</div>'+
           '<div>👨‍🏫 <strong>教授：</strong>'+(s.prof&&s.prof!=='待核实'?s.prof:'待核实')+'</div>'+
           '<div>💡 '+s.note+'</div>'+
+          (s._detail?'<div style=\"margin-top:6px;padding:6px 10px;background:var(--chip-bg);border-radius:6px;font-size:10px;line-height:1.8;\"><strong>📊 匹配分明细：</strong>层次'+(s._detail.tier)+'/30 + 英语'+(s._detail.eng)+'/20 + 范围'+(s._detail.scope)+'/20 + 题型'+(s._detail.qtype)+'/15 + 时间'+(s._detail.time)+'/15'+(s._detail.risk!==0?' · 策略'+(s._detail.risk>0?'+':'')+s._detail.risk:'')+' = <strong>'+s._detail.total+'分</strong></div>':'')+
         '</div>'+
         '<div class="links">'+
           '<a href="'+s.yz+'" target="_blank" rel="noopener">📋 研招网</a>'+
