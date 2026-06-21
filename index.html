@@ -1312,6 +1312,7 @@ function refresh() {
   } else {
     var re = document.getElementById('relaxed-results');
     if (re) re.innerHTML = '';
+  }
 
   // 保底推荐：严格+宽松之后仍不足时，基于纯背景推荐（忽略所有筛选）
   var totalCount = schools.length + (relaxed?relaxed.length:0);
