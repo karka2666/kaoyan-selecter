@@ -466,6 +466,30 @@ body.dark .hero { background:linear-gradient(165deg,#2D2418 0%,#1E1B1A 35%,#261E
   </div></div>
 </div>
 
+<!-- 反馈弹窗 -->
+<div class="detail-overlay" id="fb-dlg" onclick="if(event.target===this)closeFb()">
+  <div class="detail-box"><div class="d-hd"><h3>💬 反馈 & 建议</h3><button class="detail-close" onclick="closeFb()">✕</button></div>
+  <div class="d-body">
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">你的反馈会帮助菠萝烤盐变得更准更好用 ❤️</p>
+    <textarea id="fb-text" rows="5" placeholder="比如：XX学校的考试科目需要更新、希望增加XX功能、发现了一个bug……" style="width:100%;padding:12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;resize:vertical;background:var(--bg);color:var(--text);"></textarea>
+    <div style="margin-top:8px;"><input id="fb-contact" placeholder="选填：微信/邮箱/小红书（方便回复你）" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-family:inherit;background:var(--bg);color:var(--text);"></div>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary btn-sm" onclick="submitFeedback()">📋 复制反馈内容</button>
+      <span style="font-size:10px;color:var(--muted);line-height:2;">复制后请发送到小红书/微信 @菠萝烤盐</span>
+    </div>
+  </div></div>
+</div>
+
+<!-- 赞赏弹窗 -->
+<div class="detail-overlay" id="donate-dlg" onclick="if(event.target===this)closeDonate()">
+  <div class="detail-box" style="max-width:400px;text-align:center;"><div class="d-hd"><h3>🍍 请开发者喝杯奶茶</h3><button class="detail-close" onclick="closeDonate()">✕</button></div>
+  <div class="d-body">
+    <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">每一份支持都会变成更好的数据和功能 ✨</p>
+    <div id="qr-placeholder" style="width:200px;height:200px;margin:0 auto 12px;background:var(--chip-bg);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;">📷<br>二维码图片<br>即将更新</div>
+    <p style="font-size:10px;color:var(--muted);">微信/支付宝扫码均可</p>
+  </div></div>
+</div>
+
 <!-- 学校详情弹窗 -->
 <div class="detail-overlay" id="detail-dlg" onclick="if(event.target===this)closeDetail()">
   <div class="detail-box"><div class="d-hd"><h3 id="detail-title"></h3><button class="modal-close" onclick="closeDetail()">✕</button></div><div class="d-body" id="detail-body"></div></div>
@@ -484,8 +508,9 @@ body.dark .hero { background:linear-gradient(165deg,#2D2418 0%,#1E1B1A 35%,#261E
 
 <footer style="text-align:center;padding:20px;font-size:11px;color:var(--muted);border-top:1px solid var(--border);margin-top:40px;">
   © 2024 <strong>菠萝烤盐</strong> · 由 <a href="https://github.com/karka2666" target="_blank" style="color:var(--accent);">karka2666</a> 独立开发 ·
-  <a href="https://github.com/karka2666/kaoyan-selector" target="_blank" style="color:var(--accent);">GitHub</a> ·
-  MIT 开源协议 · 数据持续更新中
+  <a href="https://github.com/karka2666/kaoyan-selector" target="_blank" style="color:var(--accent);">GitHub</a> · MIT 开源 · 数据持续更新<br>
+  <span style="cursor:pointer;color:var(--accent);" onclick="openFb()">💬 反馈建议</span> ·
+  <span style="cursor:pointer;color:var(--accent);" onclick="openDonate()">🍍 请喝奶茶</span>
 </footer>
 
 <button class="back-top" id="back-top" onclick="scrollTo(0,0)">↑</button>
@@ -1141,6 +1166,17 @@ function showDetail(name) {
 function closeDetail(){$('detail-dlg').classList.remove('open');document.body.style.overflow='';}
 function toggleHelp(){$('help-dlg').classList.toggle('open');document.body.style.overflow=$('help-dlg').classList.contains('open')?'hidden':'';}
 function closeHelp(){$('help-dlg').classList.remove('open');document.body.style.overflow='';}
+function openFb(){$('fb-dlg').classList.add('open');document.body.style.overflow='hidden';}
+function closeFb(){$('fb-dlg').classList.remove('open');document.body.style.overflow='';}
+function openDonate(){$('donate-dlg').classList.add('open');document.body.style.overflow='hidden';}
+function closeDonate(){$('donate-dlg').classList.remove('open');document.body.style.overflow='';}
+function submitFeedback(){
+  var text=document.getElementById('fb-text').value.trim();
+  var contact=document.getElementById('fb-contact').value.trim();
+  if(!text){alert('请先填写反馈内容');return;}
+  var msg='【菠萝烤盐 用户反馈】\n'+text+(contact?'\n\n联系方式：'+contact:'')+'\n\n---\n请将以上内容发送给 @菠萝烤盐';
+  navigator.clipboard.writeText(msg).then(function(){alert('已复制！请打开小红书或微信，搜索 @菠萝烤盐，粘贴发送。\n感谢你的反馈 ❤️');closeFb();}).catch(function(){alert('复制失败，请手动复制：\n'+msg);});
+}
 
 // ═══════════ 纠错反馈 ═══════════
 function sendFeedback(name) {
@@ -1509,7 +1545,7 @@ function showQuizResult() {
     saveState(); goStep(3);
   }
   document.addEventListener('keydown',function(e){
-    if(e.key==='Escape'){closeCmp();closeDetail();}
+    if(e.key==='Escape'){closeCmp();closeDetail();closeHelp();closeFb();closeDonate();}
   });
 })();
 </script>
