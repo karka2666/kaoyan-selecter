@@ -508,7 +508,7 @@ body.dark .hero { background:linear-gradient(165deg,#2D2418 0%,#1E1B1A 35%,#261E
   © 2024 <strong>菠萝烤盐</strong> · 由 <a href="https://github.com/karka2666" target="_blank" style="color:var(--accent);">karka2666</a> 独立开发 ·
   <a href="https://github.com/karka2666/kaoyan-selector" target="_blank" style="color:var(--accent);">GitHub</a> · MIT 开源 · 数据持续更新<br>
   <span style="cursor:pointer;color:var(--accent);" onclick="openFb()">💬 反馈建议</span> ·
-  <span style="cursor:pointer;color:var(--accent);" onclick="openDonate()">🍍 赞赏支持</span>
+  <span style="cursor:pointer;color:var(--accent);background:var(--accent-light);padding:4px 12px;border-radius:16px;font-weight:600;" onclick="openDonate()">🍍 请喝奶茶</span>
 </footer>
 
 <button class="back-top" id="back-top" onclick="scrollTo(0,0)">↑</button>
@@ -1526,6 +1526,7 @@ var QUIZ_QUESTIONS = [
       { t: '大学教师/学术研究者', s: { '文艺学': 1, '比较文学与世界文学': 1 } },
       { t: '中学语文教师', s: { '中国古代文学': 1, '中国现当代文学': 1 } },
       { t: '出版社编辑/文化行业', s: { '中国现当代文学': 1, '中国古代文学': 1 } },
+      { t: '去大城市刷实习 / 好找工作', s: { '中国现当代文学': 1, '比较文学与世界文学': 1 } },
       { t: '还没想好 / 都可以', s: {} }
     ]
   }
@@ -1615,14 +1616,11 @@ function showQuizResult() {
   $('quiz-result').innerHTML = h;
   $('quiz-result').classList.add('show');
 
-  // 自动勾选推荐方向
+  // 自动勾选推荐方向（不滚动，避免打断做题体验）
   var recSet = [top.k];
   if (second && second.v >= top.v * 0.6) recSet.push(second.k);
   setChips('self-majors', recSet);
   onChange();
-
-  // 滚动到报考方向区域
-  $('self-majors').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 // ═══════════ INIT ═══════════
@@ -1641,7 +1639,7 @@ function showQuizResult() {
   fetch('https://api.countapi.xyz/hit/kaoyan-chinese-lit-selector/visits')
     .then(function(r) { return r.json(); })
     .then(function(d) { $('visit-count').textContent = (d.value || 0).toLocaleString(); })
-    .catch(function() { $('visit-count').textContent = '---'; });
+    .catch(function() { var el=$('visit-count'); if(el&&el.parentElement)el.parentElement.style.display='none'; });
   if(location.hash&&location.hash.length>1){
     var p=new URLSearchParams(location.hash.substring(1));
     ['bg','eng','qt','fr','rk','tm'].forEach(function(k){if(p.get(k))$('self-'+k).value=p.get(k);});
