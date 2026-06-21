@@ -3,7 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>汉语言文学考研择校工具 · 菠萝烤盐</title>
+<title>菠萝烤盐 · 汉语言文学考研择校工具</title>
+<meta name="description" content="覆盖全国130+院校，智能匹配评分，冲稳保梯度推荐。帮你找到最适合的考研目标学校。">
+<meta property="og:title" content="菠萝烤盐 · 汉语言文学考研择校">
+<meta property="og:description" content="130+院校 · 智能匹配 · 冲稳保梯度 · 免费开源">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="菠萝烤盐">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="菠萝烤盐 · 考研择校">
+<meta name="twitter:description" content="130+院校 · 智能匹配 · 冲稳保梯度 · 免费开源">
 <style>
 :root {
   --bg: #FFFBF7; --card: #fff; --border: #F0E8DD;
@@ -941,14 +949,15 @@ function closeDetail(){$('detail-dlg').classList.remove('open');document.body.st
 function sendFeedback(name) {
   var s = DB.filter(function(x){return x.n===name;})[0];
   if (!s) return;
-  var info = '学校：'+s.n+'\n层次：'+s.t+' | 城市：'+s.c+' | 评估：'+s.rank+'\n考试范围：'+s.s+' | 作文：'+s.w+'\n科目：'+s.exam+'\n招生：'+s.enroll+' | 竞争：'+s.comp+'\n一志愿保护：'+(s.protect||'?')+' | 复试淘汰：'+(s.reject||'?')+'\n教授：'+(s.prof||'?')+'\n可信度：'+(VERIFY_LABELS[getVerify(s)]||'?')+'\n\n请在此补充/纠错：\n';
-  var mailto = 'mailto:?subject=[择校数据纠错] '+encodeURIComponent(s.n)+'&body='+encodeURIComponent(info);
-  // 同时复制到剪贴板
-  navigator.clipboard.writeText(info).then(function(){
-    alert('学校信息已复制到剪贴板！\n请粘贴到邮件/微信中，补充你的纠错内容后发送。\n\n如邮箱客户端未打开，也可以手动粘贴。');
-  }).catch(function(){
-    window.open(mailto, '_blank');
-  });
+  var title = '[数据纠错] '+s.n;
+  var body = '## 当前数据\n| 字段 | 值 |\n|------|------|\n'+
+    '| 层次 | '+s.t+' |\n| 城市 | '+s.c+' |\n| 评估 | '+s.rank+' |\n'+
+    '| 考试范围 | '+s.s+' |\n| 作文 | '+s.w+' |\n| 科目 | '+s.exam+' |\n'+
+    '| 招生 | '+s.enroll+' |\n| 竞争 | '+s.comp+' |\n'+
+    '| 一志愿保护 | '+(s.protect||'?')+' |\n| 复试淘汰 | '+(s.reject||'?')+' |\n'+
+    '| 教授 | '+(s.prof||'?')+' |\n| 可信度 | '+(VERIFY_LABELS[getVerify(s)]||'?')+' |\n\n'+
+    '## 纠错/补充内容\n> 请在此描述需要更正或补充的信息：\n';
+  window.open('https://github.com/karka2666/kaoyan-selector/issues/new?title='+encodeURIComponent(title)+'&body='+encodeURIComponent(body)+'&labels=data-fix', '_blank');
 }
 
 // ═══════════ 核心 ═══════════
