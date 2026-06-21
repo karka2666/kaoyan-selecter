@@ -477,6 +477,17 @@ body.dark .hero { background:linear-gradient(165deg,#2D2418 0%,#1E1B1A 35%,#261E
   </div></div>
 </div>
 
+<!-- 赞赏弹窗 -->
+<div class="detail-overlay" id="donate-dlg" onclick="if(event.target===this)closeDonate()">
+  <div class="detail-box" style="max-width:380px;text-align:center;"><div class="d-hd"><h3>🍍 请开发者喝杯奶茶</h3><button class="detail-close" onclick="closeDonate()">✕</button></div>
+  <div class="d-body">
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">每一份支持都会变成更好的数据 ✨</p>
+    <img src="donate.png" alt="赞赏码" style="width:200px;height:200px;object-fit:contain;border-radius:var(--radius-sm);" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+    <p style="display:none;font-size:12px;color:var(--muted);">📷 请将赞赏码图片保存为 donate.png 放入项目文件夹</p>
+    <p style="font-size:10px;color:var(--muted);margin-top:8px;">感谢支持菠萝烤盐 ❤️</p>
+  </div></div>
+</div>
+
 <!-- 学校详情弹窗 -->
 <div class="detail-overlay" id="detail-dlg" onclick="if(event.target===this)closeDetail()">
   <div class="detail-box"><div class="d-hd"><h3 id="detail-title"></h3><button class="modal-close" onclick="closeDetail()">✕</button></div><div class="d-body" id="detail-body"></div></div>
@@ -496,7 +507,8 @@ body.dark .hero { background:linear-gradient(165deg,#2D2418 0%,#1E1B1A 35%,#261E
 <footer style="text-align:center;padding:20px;font-size:11px;color:var(--muted);border-top:1px solid var(--border);margin-top:40px;">
   © 2024 <strong>菠萝烤盐</strong> · 由 <a href="https://github.com/karka2666" target="_blank" style="color:var(--accent);">karka2666</a> 独立开发 ·
   <a href="https://github.com/karka2666/kaoyan-selector" target="_blank" style="color:var(--accent);">GitHub</a> · MIT 开源 · 数据持续更新<br>
-  <span style="cursor:pointer;color:var(--accent);" onclick="openFb()">💬 反馈建议</span>
+  <span style="cursor:pointer;color:var(--accent);" onclick="openFb()">💬 反馈建议</span> ·
+  <span style="cursor:pointer;color:var(--accent);" onclick="openDonate()">🍍 赞赏支持</span>
 </footer>
 
 <button class="back-top" id="back-top" onclick="scrollTo(0,0)">↑</button>
@@ -1164,21 +1176,13 @@ function toggleHelp(){$('help-dlg').classList.toggle('open');document.body.style
 function closeHelp(){$('help-dlg').classList.remove('open');document.body.style.overflow='';}
 function openFb(){$('fb-dlg').classList.add('open');document.body.style.overflow='hidden';}
 function closeFb(){$('fb-dlg').classList.remove('open');document.body.style.overflow='';}
+function openDonate(){$('donate-dlg').classList.add('open');document.body.style.overflow='hidden';}
+function closeDonate(){$('donate-dlg').classList.remove('open');document.body.style.overflow='';}
 
 
 // ═══════════ 纠错反馈 ═══════════
 function sendFeedback(name) {
-  var s = DB.filter(function(x){return x.n===name;})[0];
-  if (!s) return;
-  var title = '[数据纠错] '+s.n;
-  var body = '## 当前数据\n| 字段 | 值 |\n|------|------|\n'+
-    '| 层次 | '+s.t+' |\n| 城市 | '+s.c+' |\n| 评估 | '+s.rank+' |\n'+
-    '| 考试范围 | '+s.s+' |\n| 作文 | '+s.w+' |\n| 科目 | '+s.exam+' |\n'+
-    '| 招生 | '+s.enroll+' |\n| 竞争 | '+s.comp+' |\n'+
-    '| 一志愿保护 | '+(s.protect||'?')+' |\n| 复试淘汰 | '+(s.reject||'?')+' |\n'+
-    '| 教授 | '+(s.prof||'?')+' |\n| 可信度 | '+(VERIFY_LABELS[getVerify(s)]||'?')+' |\n\n'+
-    '## 纠错/补充内容\n> 请在此描述需要更正或补充的信息：\n';
-  window.open('https://github.com/karka2666/kaoyan-selector/issues/new?title='+encodeURIComponent(title)+'&body='+encodeURIComponent(body)+'&labels=data-fix', '_blank');
+  window.open('https://wj.qq.com/s2/27087570/380e/', '_blank');
 }
 
 // ═══════════ 核心 ═══════════
@@ -1308,6 +1312,45 @@ function refresh() {
   } else {
     var re = document.getElementById('relaxed-results');
     if (re) re.innerHTML = '';
+
+  // 保底推荐：严格+宽松之后仍不足时，基于纯背景推荐（忽略所有筛选）
+  var totalCount = schools.length + (relaxed?relaxed.length:0);
+  if (totalCount < 9) {
+    var allNames = {}; for (var ai=0;ai<schools.length;ai++) allNames[schools[ai].n]=true;
+    if (relaxed) for (var ri3=0;ri3<relaxed.length;ri3++) allNames[relaxed[ri3].n]=true;
+    var fallback = DB.map(function(s){ s.score=calcScore(s,self); s.strategy=getStrategy(s,self); return s; })
+      .filter(function(s){ return !allNames[s.n]; })
+      .sort(function(a,b){ return b.score-a.score; });
+    // 取冲稳保各3所
+    var fbResult = [];
+    var fbCount = { '冲':0, '稳':0, '保':0 };
+    for (var fi=0;fi<fallback.length && fbResult.length<3;fi++) {
+      var stg = fallback[fi].strategy;
+      if (fbCount[stg] < 1) { fbResult.push(fallback[fi]); fbCount[stg]++; }
+    }
+    if (fbResult.length > 0) {
+      var fbh = '<div style="margin-top:12px;padding-top:12px;border-top:1px dotted var(--border);">'+
+        '<div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--muted);">💡 筛选条件较严格？基于你的背景评估，这些学校也值得一看</div>';
+      for (var fbi=0;fbi<fbResult.length;fbi++) {
+        var fs = fbResult[fbi];
+        var fcolor = fs.score>=70?'var(--green)':fs.score>=45?'#e67e22':'var(--red)';
+        var fscCls = fs.strategy==='冲'?'s-chong':fs.strategy==='稳'?'s-wen':'s-bao';
+        fbh += '<div class="school-card" style="opacity:.8;border-left-width:2px;">'+
+          '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">'+
+            '<span><span class="sname" onclick="showDetail(\''+fs.n.replace(/'/g,"\\'")+'\')">'+fs.n+'</span>'+
+            '<span class="tier-badge '+(fs.t==='985'?'t985':fs.t==='211'?'t211':fs.t==='双一流'?'tsyl':'tsf')+'" style="margin-left:4px;">'+fs.t+'</span>'+
+            '<span class="strategy-badge '+fscCls+'">'+fs.strategy+'</span></span>'+
+            '<span style="font-weight:800;font-size:12px;color:'+fcolor+';">'+fs.score+'分</span>'+
+          '</div></div>';
+      }
+      fbh += '</div>';
+      var be = document.getElementById('fallback-results');
+      if (!be) { be = document.createElement('div'); be.id = 'fallback-results'; $('card-grid').after(be); }
+      be.innerHTML = fbh;
+    }
+  } else {
+    var oldFb = document.getElementById('fallback-results');
+    if (oldFb) oldFb.innerHTML = '';
   }
 }
 
@@ -1609,7 +1652,7 @@ function showQuizResult() {
     saveState(); goStep(3);
   }
   document.addEventListener('keydown',function(e){
-    if(e.key==='Escape'){closeCmp();closeDetail();closeHelp();closeFb();}
+    if(e.key==='Escape'){closeCmp();closeDetail();closeHelp();closeFb();closeDonate();}
   });
 })();
 </script>
