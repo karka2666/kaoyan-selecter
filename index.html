@@ -86,8 +86,21 @@ body.dark .hero { background:linear-gradient(165deg,#2D2418 0%,#1E1B1A 35%,#261E
 .chip-group { display:flex; flex-wrap:wrap; gap:7px; }
 .chip { display:inline-flex; align-items:center; gap:4px; padding:8px 16px; border:1px solid var(--border); border-radius:24px; font-size:13px; cursor:pointer; user-select:none; background:var(--card); transition:all .15s; }
 .chip:hover { border-color:var(--accent); background:var(--accent-bg); }
-.chip.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+.chip.active { background:var(--accent); color:#fff; border-color:var(--accent); box-shadow:0 2px 8px rgba(240,150,106,.25); }
+.chip.suggested { border-color:var(--accent); border-style:dashed; background:var(--accent-light); animation:glowPulse 2s infinite; }
+.chip.suggested::after { content:' 💡'; font-size:10px; }
+@keyframes glowPulse { 0%,100%{box-shadow:0 0 0 0 rgba(240,150,106,.25);} 50%{box-shadow:0 0 0 6px rgba(240,150,106,0);} }
 .chip input { display:none; }
+
+.suggest-hint { font-size:11px; color:var(--accent); margin-bottom:10px; display:none; }
+.suggest-hint.show { display:block; }
+.similar-schools { margin-top:10px; padding-top:10px; border-top:1px dashed var(--border); }
+.similar-schools h4 { font-size:11px; color:var(--muted); margin-bottom:6px; }
+.similar-row { display:flex; gap:6px; flex-wrap:wrap; }
+.similar-chip { padding:4px 12px; border-radius:14px; font-size:11px; cursor:pointer; background:var(--chip-bg); transition:all .15s; }
+.similar-chip:hover { background:var(--accent-light); color:var(--accent); }
+.low-result-tip { background:var(--accent-light); border:1px dashed var(--accent); border-radius:var(--radius-sm); padding:10px 16px; margin-top:10px; font-size:11px; display:none; }
+.low-result-tip.show { display:block; }
 
 .btn { display:inline-flex; align-items:center; gap:6px; padding:12px 28px; border-radius:8px; border:none; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; letter-spacing:.03em; transition:all .15s; }
 .btn-primary { background:var(--accent); color:#fff; box-shadow:0 2px 8px rgba(212,120,74,.3); }
@@ -657,7 +670,7 @@ function goStep(n) {
   document.querySelectorAll('.step.done .num').forEach(function(el){el.textContent='✓';});
   document.querySelectorAll('.step:not(.done) .num').forEach(function(el){el.textContent=parseInt(el.parentElement.dataset.step);});
   if(n===3) refresh();
-  if(n===2) { applyRegions(); updateLive(); }
+  if(n===2) { applyRegions(); applySuggestions(); updateLive(); }
   scrollTo(0,0); saveState();
 }
 
@@ -665,6 +678,96 @@ function applyRegions() {
   var regs = chipVals('self-regions');
   if(regs.length>0) setChips('filter-region', regs);
   saveState();
+}
+
+// ═══════════ 智能推荐 ═══════════
+function applySuggestions() {
+  var self = getSelf();
+  var hints = [];
+  // 清除旧推荐
+  document.querySelectorAll('#filter-tier .chip,#filter-region .chip').forEach(function(c){c.classList.remove('suggested');});
+
+  // 给分建议
+  var engMap = {'强':'水区','中':'水区','弱':'旱区','很弱':'旱区'}; // 相反：强→去水区赚分，弱→避开旱区
+  // 实际上：英语强→可以挑战旱区，英语弱→应该选水区
+  var engAdvice = {'强':null,'中':null,'弱':'水区','很弱':'水区'};
+  if(self.eng && engAdvice[self.eng]){
+    hints.push('英语'+(self.eng==='很弱'?'较':'偏')+'弱，推荐选择给分宽松的「水区」或「中等」');
+    document.querySelectorAll('#filter-region .chip').forEach(function(c){
+      // 不按地区推荐，而是在step2加给分建议
+    });
+  }
+
+  // 考试恐惧建议
+  if(self.fear==='怕语言学'||self.fear==='怕大综合'){
+    hints.push('你提到'+self.fear+'，推荐筛选「小综合」');
+  }
+  if(self.fear==='怕作文'){
+    hints.push('你提到怕作文，推荐筛选「不考作文」');
+  }
+
+  // 时间建议
+  if(self.time==='在职'||self.time==='半职'){
+    hints.push('备考时间有限，建议筛选「保护一志愿」的学校');
+    document.querySelectorAll('[id=filter-protect] option').forEach(function(o){ if(o.value==='是') o.style.background='var(--accent-light)'; });
+  }
+
+  // 显示提示
+  var hintEl = document.getElementById('suggest-hint') || (function(){
+    var el = document.createElement('div'); el.id = 'suggest-hint'; el.className = 'suggest-hint';
+    var card = document.querySelector('#sec-2 .card');
+    if(card){ var p = card.querySelector('p'); if(p) p.after(el); else card.insertBefore(el, card.firstChild.nextSibling); }
+    return el;
+  })();
+  if(hints.length>0){
+    hintEl.innerHTML = '💡 '+hints.join('；');
+    hintEl.classList.add('show');
+  } else {
+    hintEl.classList.remove('show');
+    hintEl.innerHTML = '';
+  }
+
+  // 给分区建议——高亮水区/中等给英语弱的用户
+  if(self.eng==='弱'||self.eng==='很弱'){
+    document.querySelectorAll('#filter-grading option').forEach(function(o){
+      if(o.value==='水区'||o.value==='中等') o.dataset.suggested = '1';
+    });
+  }
+  // 英语强→推荐旱区（有优势）
+  if(self.eng==='强'){
+    document.querySelectorAll('#filter-grading option').forEach(function(o){
+      if(o.value==='旱区') o.dataset.suggested = '1';
+    });
+  }
+}
+
+// ═══════════ 相似学校 ═══════════
+function getSimilar(school, self) {
+  var sc = calcScore(school, self);
+  return DB.filter(function(s){
+    if(s.n===school.n) return false;
+    var diff = Math.abs(calcScore(s, self) - sc);
+    return s.t===school.t && s.r===school.r && diff < 15;
+  }).sort(function(a,b){ return Math.abs(calcScore(a,self)-sc) - Math.abs(calcScore(b,self)-sc); }).slice(0,3);
+}
+
+// ═══════════ 低结果建议 ═══════════
+function showLowResultTip(count) {
+  var el = document.getElementById('low-result-tip') || (function(){
+    var e = document.createElement('div'); e.id = 'low-result-tip'; e.className = 'low-result-tip';
+    var grid = document.getElementById('card-grid');
+    if(grid && grid.parentNode) grid.parentNode.insertBefore(e, grid);
+    return e;
+  })();
+  if(count>0 && count<8){
+    el.classList.add('show');
+    var tips = [];
+    if(chipVals('filter-tier').length===0) tips.push('勾选「学校层次」缩小范围');
+    if(!document.getElementById('filter-grading').value) tips.push('试试不同的「给分区」');
+    el.innerHTML = '🔍 结果不多（'+count+'所），试试放宽筛选，或者：' + (tips.length>0?tips.join('，'):'查看更多选项');
+  } else {
+    el.classList.remove('show');
+  }
 }
 
 function resetSelf() {
@@ -940,7 +1043,19 @@ function showDetail(name) {
     '<div class="ds"><h4>匹配评分</h4><p style="font-size:20px;font-weight:800;color:'+(sc>=70?'var(--green)':sc>=45?'#e67e22':'var(--red)')+';">'+sc+' / 100</p></div>'+
     '<div class="ds"><h4>教授 / 方向</h4><p>'+(s.prof&&s.prof!=='待核实'?s.prof:'暂无')+'</p></div>'+
     '<div class="ds"><h4>备注</h4><p>'+s.note+'</p></div>'+
-    '<div style="display:flex;gap:8px;flex-wrap:wrap;"><a href="'+s.yz+'" target="_blank" style="color:var(--accent);">📋 研招网</a> <a href="'+s.wx+'" target="_blank" style="color:var(--accent);">🏫 文学院官网</a></div>';
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"><a href="'+s.yz+'" target="_blank" style="color:var(--accent);">📋 研招网</a> <a href="'+s.wx+'" target="_blank" style="color:var(--accent);">🏫 文学院官网</a></div>';
+
+  var similar = getSimilar(s, self);
+  if(similar.length>0){
+    html += '<div class="similar-schools"><h4>🔗 你可能也感兴趣</h4><div class="similar-row">';
+    for(var si=0;si<similar.length;si++){
+      var sim = similar[si];
+      var sn2 = sim.n.replace(/'/g,"\\'");
+      html += '<span class="similar-chip" onclick="closeDetail();showDetail(\''+sn2+'\')">'+sim.n+' ('+calcScore(sim,self)+'分)</span>';
+    }
+    html += '</div></div>';
+  }
+
   $('detail-dlg').classList.add('open'); document.body.style.overflow='hidden';
 }
 function closeDetail(){$('detail-dlg').classList.remove('open');document.body.style.overflow='';}
@@ -1011,6 +1126,7 @@ function refresh() {
 
   $('results-count').innerHTML = '共 <strong>'+schools.length+'</strong> 所匹配';
   $('hero-count').textContent = schools.length;
+  showLowResultTip(schools.length);
   renderCards(schools);
 }
 
