@@ -12,6 +12,10 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="菠萝烤盐 · 考研择校">
 <meta name="twitter:description" content="130+院校 · 智能匹配 · 冲稳保梯度 · 免费开源">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="菠萝烤盐">
+<meta name="theme-color" content="#FFFBF7">
+<link rel="manifest" href="data:application/json,{'name':'菠萝烤盐·考研择校','short_name':'菠萝烤盐','start_url':'.','display':'standalone','background_color':'%23FFFBF7','theme_color':'%23F0976A','icons':[]}">
 <style>
 :root {
   --bg: #FFFBF7; --card: #fff; --border: #F0E8DD;
@@ -62,6 +66,8 @@ body.dark .hero { background:linear-gradient(165deg,#2D2418 0%,#1E1B1A 35%,#261E
 .hero .stat-row .st { background:var(--card); border-radius:16px; padding:10px 18px; box-shadow:var(--shadow-sm); min-width:70px; border:1px solid var(--border); }
 .hero .stat-row .st .n { font-size:20px; font-weight:700; color:var(--accent); }
 .hero .stat-row .st .l { font-size:11px; color:var(--muted); }
+.help-btn { position:absolute; top:16px; right:64px; width:36px; height:36px; border-radius:50%; border:1.5px solid var(--border); background:var(--card); cursor:pointer; font-size:15px; font-weight:700; display:flex; align-items:center; justify-content:center; z-index:5; color:var(--muted); transition:all .2s; }
+.help-btn:hover { border-color:var(--accent); color:var(--accent); }
 .theme-toggle { position:absolute; top:16px; right:20px; width:36px; height:36px; border-radius:50%; border:1px solid var(--border); background:var(--card); cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; }
 
 .steps { display:flex; justify-content:center; gap:40px; padding:14px 20px; border-bottom:1px solid var(--border); background:var(--card); position:sticky; top:0; z-index:10; }
@@ -101,6 +107,11 @@ body.dark .hero { background:linear-gradient(165deg,#2D2418 0%,#1E1B1A 35%,#261E
 .similar-chip:hover { background:var(--accent-light); color:var(--accent); }
 .low-result-tip { background:var(--accent-light); border:1px dashed var(--accent); border-radius:var(--radius-sm); padding:10px 16px; margin-top:10px; font-size:11px; display:none; }
 .low-result-tip.show { display:block; }
+
+.advanced-toggle { font-size:12px; color:var(--muted); cursor:pointer; padding:8px 0; user-select:none; border-top:1px dashed var(--border); margin-top:6px; transition:color .15s; }
+.advanced-toggle:hover { color:var(--accent); }
+.advanced-toggle .adv-arrow { display:inline-block; transition:transform .2s; font-size:10px; }
+.advanced-toggle.open .adv-arrow { transform:rotate(180deg); }
 
 .btn { display:inline-flex; align-items:center; gap:6px; padding:12px 28px; border-radius:8px; border:none; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; letter-spacing:.03em; transition:all .15s; }
 .btn-primary { background:var(--accent); color:#fff; box-shadow:0 2px 8px rgba(212,120,74,.3); }
@@ -249,11 +260,24 @@ body.dark .hero { background:linear-gradient(165deg,#2D2418 0%,#1E1B1A 35%,#261E
   .school-card { padding:12px 14px; }
   .cmp-table th, .cmp-table td { padding:8px; font-size:10px; }
 }
+@media print {
+  .steps,.theme-toggle,.back-top,.compare-bar,.btn-row button,.sort-group,
+  .live-count,.fav-star,.cmp-check,.feedback-link,.target-panel,.step-cards,
+  footer,.hero::before,.hero::after,.logo-wrap { display:none !important; }
+  .school-card { break-inside:avoid; border-left:4px solid #333 !important; box-shadow:none !important; margin-bottom:6px !important; padding:8px 12px !important; }
+  .school-card details { display:block !important; }
+  .school-card summary { display:none !important; }
+  body { background:#fff !important; color:#000 !important; font-size:10px !important; }
+  .hero { padding:12px !important; background:#fff !important; border-bottom:2px solid #000 !important; }
+  .hero h1 { font-size:18px !important; }
+  .main { padding:12px !important; }
+}
 </style>
 </head>
 <body>
 
 <div class="hero">
+  <button class="help-btn" onclick="toggleHelp()" title="使用帮助">?</button>
   <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">🌙</button>
   <div class="logo-wrap">
     <svg class="logo-pineapple" viewBox="0 0 120 120" width="72" height="72">
@@ -360,11 +384,16 @@ body.dark .hero { background:linear-gradient(165deg,#2D2418 0%,#1E1B1A 35%,#261E
       <div class="form-group"><label>是否考作文/论文</label><select id="filter-writing"><option value="">不限</option><option value="有">✍️ 有写作</option><option value="无">❌ 不考作文</option></select></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>是否保护一志愿</label><select id="filter-protect"><option value="">不限</option><option value="是">🛡️ 是</option><option value="否">⚠️ 否</option></select></div>
-      <div class="form-group"><label>冲稳保梯度</label><select id="filter-strategy"><option value="">不限</option><option value="冲">🔴 冲刺</option><option value="稳">🟡 稳妥</option><option value="保">🟢 保底</option></select></div>
-    </div>
-    <div class="form-row">
       <div class="form-group"><label>关键词搜索</label><input type="text" id="filter-search" placeholder="学校 / 城市 / 教授名"></div>
+    </div>
+    <div class="advanced-toggle" onclick="this.classList.toggle('open');var el=document.getElementById('advanced-filters');el.style.display=el.style.display==='none'?'block':'none';">
+      ⚙️ 更多筛选 <span class="adv-arrow">▼</span>
+    </div>
+    <div id="advanced-filters" style="display:none;">
+      <div class="form-row">
+        <div class="form-group"><label>是否保护一志愿</label><select id="filter-protect"><option value="">不限</option><option value="是">🛡️ 是</option><option value="否">⚠️ 否</option></select></div>
+        <div class="form-group"><label>冲稳保梯度</label><select id="filter-strategy"><option value="">不限</option><option value="冲">🔴 冲刺</option><option value="稳">🟡 稳妥</option><option value="保">🟢 保底</option></select></div>
+      </div>
     </div>
     <div class="btn-row"><button class="btn btn-ghost" onclick="goStep(1)">← 返回评估</button><button class="btn btn-ghost" onclick="resetFilters()">重置筛选</button><button class="btn btn-primary" onclick="goStep(3)">查看匹配结果 →</button><span style="font-size:11px;color:var(--muted);cursor:pointer;text-decoration:underline;margin-left:auto;" onclick="clearAll()">清除缓存</span></div>
   </div>
@@ -393,6 +422,16 @@ body.dark .hero { background:linear-gradient(165deg,#2D2418 0%,#1E1B1A 35%,#261E
   </div>
   <div id="card-grid"></div>
 </div>
+</div>
+
+<!-- 使用帮助弹窗 -->
+<div class="detail-overlay" id="help-dlg" onclick="if(event.target===this)closeHelp()">
+  <div class="detail-box"><div class="d-hd"><h3>📖 使用帮助</h3><button class="detail-close" onclick="closeHelp()">✕</button></div><div class="d-body">
+    <div class="ds"><h4>三步完成择校</h4><p><strong>① 方向适配测试</strong>（可选）→ 5道题帮你找到最适合的方向<br><strong>② 填写个人背景</strong> → 本科层次、英语水平、偏好<br><strong>③ 筛选+查看结果</strong> → 智能匹配分排序，冲稳保梯度一目了然</p></div>
+    <div class="ds"><h4>匹配分怎么算的</h4><p>基于5个维度加权打分：层次匹配(30%) + 英语适配(20%) + 考试范围(20%) + 题型匹配(15%) + 时间匹配(15%)，再根据择校策略微调。</p></div>
+    <div class="ds"><h4>数据可信度</h4><p>🟢 官网确认 · 🟡 经验推断 · ⚪ 待核实。点击学校名看详情，点「纠错」帮我们改进。</p></div>
+    <div class="ds"><h4>快捷键</h4><p><kbd>Ctrl+1/2/3</kbd> 切换步骤 · <kbd>Esc</kbd> 关闭弹窗</p></div>
+  </div></div>
 </div>
 
 <!-- 学校详情弹窗 -->
@@ -1068,6 +1107,8 @@ function showDetail(name) {
   $('detail-dlg').classList.add('open'); document.body.style.overflow='hidden';
 }
 function closeDetail(){$('detail-dlg').classList.remove('open');document.body.style.overflow='';}
+function toggleHelp(){$('help-dlg').classList.toggle('open');document.body.style.overflow=$('help-dlg').classList.contains('open')?'hidden':'';}
+function closeHelp(){$('help-dlg').classList.remove('open');document.body.style.overflow='';}
 
 // ═══════════ 纠错反馈 ═══════════
 function sendFeedback(name) {
