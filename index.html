@@ -778,11 +778,11 @@ function applySuggestions() {
   // 清除旧推荐
   document.querySelectorAll('#filter-tier .chip,#filter-region .chip').forEach(function(c){c.classList.remove('suggested');});
 
-  // A/B区建议：基于英语水平
+  // A/B区参考信息（不强制建议筛选，避免限制选择范围）
   if(self.eng==='弱'||self.eng==='很弱'){
-    hints.push('英语偏弱，推荐选择🅱️ B区（英语单科线低3-5分，竞争相对小）');
+    hints.push('英语偏弱？别担心——B区英语单科线低3-5分，但A区名校也值得冲，最终看总分');
   } else if(self.eng==='强'){
-    hints.push('英语有优势，🅰️ A区名校可以大胆冲');
+    hints.push('英语有优势，A区B区任选');
   }
 
   // 考试恐惧建议
@@ -1234,6 +1234,81 @@ function refresh() {
   $('hero-count').textContent = schools.length;
   showLowResultTip(schools.length);
   renderCards(schools);
+  // 宽松推荐：严格匹配少于15所时，展示放宽条件后的额外学校
+  var relaxedEl = document.getElementById('relaxed-results');
+  if (!relaxedEl) { relaxedEl = document.createElement('div'); relaxedEl.id = 'relaxed-results'; $('card-grid').after(relaxedEl); }
+  if (schools.length < 15 && schools.length > 0) {
+    var strictNames = {}; for (var ni=0;ni<schools.length;ni++) strictNames[schools[ni].n] = true;
+    // 逐条放宽筛选，收集额外学校
+    var relaxed = [];
+    var filtersToTry = [
+      { name: '学校层次', fn: function(s) { return true; }, check: function() { return chipVals('filter-tier').length>0; } },
+      { name: 'A/B区', fn: function(s) { return true; }, check: function() { return !!$('filter-ab').value; } },
+      { name: '考试范围', fn: function(s) { return true; }, check: function() { return !!$('filter-scope').value; } },
+      { name: '学科评估', fn: function(s) { return true; }, check: function() { return !!$('filter-rank').value; } }
+    ];
+    for (var fi=0;fi<filtersToTry.length;fi++) {
+      var ft = filtersToTry[fi];
+      if (!ft.check()) continue;
+      var extra = DB.filter(function(s) {
+        if (strictNames[s.n]) return false;
+        // Re-run all filters except this one
+        if (chipVals('filter-tier').length>0 && ft.name!=='学校层次' && chipVals('filter-tier').indexOf(s.t)<0) return false;
+        if (chipVals('filter-region').length>0 && chipVals('filter-region').indexOf(s.r)<0) return false;
+        if ($('filter-ab').value && ft.name!=='A/B区' && getAB(s)!==$('filter-ab').value) return false;
+        if ($('filter-scope').value && ft.name!=='考试范围' && s.s!=='待核实' && s.s.indexOf($('filter-scope').value)<0) return false;
+        if ($('filter-writing').value==='有' && s.w!=='有' && s.w!=='待核实') return false;
+        if ($('filter-writing').value==='无' && s.w==='有') return false;
+        if ($('filter-protect').value && s.protect && s.protect!=='待核实' && s.protect!==$('filter-protect').value) return false;
+        if ($('filter-strategy').value && getStrategy(s,self)!==$('filter-strategy').value) return false;
+        if ($('filter-rank').value && ft.name!=='学科评估' && rankOrder.indexOf(s.rank)>rankOrder.indexOf($('filter-rank').value)) return false;
+        if (self.majors.length>0 && s.majors!=='待核实') {
+          var sm=s.majors.split(','); var ok=false;
+          for(var i2=0;i2<sm.length;i2++){ var mj=sm[i2].trim(); var rmj=MAJOR_ALIAS[mj]||mj;
+            for(var j2=0;j2<self.majors.length;j2++){ var um=self.majors[j2]; var ur=MAJOR_ALIAS[um]||um;
+              if(rmj===ur||mj===um||mj.indexOf(um)>=0||um.indexOf(mj)>=0||um==='中国语言文学（大类）'){ok=true;break;} } if(ok)break; }
+          if(!ok) return false;
+        }
+        return true;
+      });
+      for (var ei=0;ei<extra.length;ei++) {
+        var alreadyAdded = false;
+        for (var ri=0;ri<relaxed.length;ri++) { if (relaxed[ri].n===extra[ei].n) { alreadyAdded=true; break; } }
+        if (!alreadyAdded) {
+          extra[ei]._relaxed = ft.name;
+          extra[ei].score = calcScore(extra[ei], self);
+          extra[ei].strategy = getStrategy(extra[ei], self);
+          relaxed.push(extra[ei]);
+        }
+      }
+      if (relaxed.length >= 8) break; // 最多展示8所
+    }
+    if (relaxed.length > 0) {
+      relaxed.sort(function(a,b){ return b.score - a.score; });
+      var rh = '<div style="margin-top:16px;padding-top:12px;border-top:2px dashed var(--border);">'+
+        '<div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--muted);">🔓 放宽部分条件后的推荐（'+relaxed.length+'所）</div>';
+      for (var ri2=0;ri2<relaxed.length;ri2++) {
+        var rs = relaxed[ri2];
+        var rcolor = rs.score>=70?'var(--green)':rs.score>=45?'#e67e22':'var(--red)';
+        var scCls = rs.strategy==='冲'?'s-chong':rs.strategy==='稳'?'s-wen':'s-bao';
+        rh += '<div class="school-card" style="opacity:.85;">'+
+          '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">'+
+            '<span><span class="sname" onclick="showDetail(\''+rs.n.replace(/'/g,"\\'")+'\')">'+rs.n+'</span>'+
+            '<span class="tier-badge '+(rs.t==='985'?'t985':rs.t==='211'?'t211':rs.t==='双一流'?'tsyl':'tsf')+'" style="margin-left:6px;">'+rs.t+'</span>'+
+            '<span class="strategy-badge '+scCls+'">'+rs.strategy+'</span>'+
+            '<span style="font-size:10px;color:var(--accent);margin-left:4px;">放宽了'+rs._relaxed+'</span></span>'+
+            '<span style="font-weight:800;font-size:13px;color:'+rcolor+';">'+rs.score+'分</span>'+
+          '</div></div>';
+      }
+      rh += '</div>';
+      relaxedEl.innerHTML = rh;
+    } else {
+      relaxedEl.innerHTML = '';
+    }
+  } else {
+    var re = document.getElementById('relaxed-results');
+    if (re) re.innerHTML = '';
+  }
 }
 
 function renderCards(schools) {
