@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>汉语言文学考研择校工具 · 文小研</title>
+<style>
+:root {
+  --bg: #faf9f7; --card: #fff; --border: #e0dbd0;
+  --text: #2b2314; --muted: #7a6e5a; --accent: #8b4513;
+  --accent-bg: #f7efe4; --red: #c0392b; --red-bg: #fdf0ed;
+  --blue: #2471a3; --blue-bg: #eaf2f8; --green: #1e7e5b; --green-bg: #e8f6f0;
+  --gold: #b8860b; --gold-bg: #fff8e7; --gold-border: #e6c34a;
+  --shadow: 0 1px 4px rgba(0,0,0,.05); --shadow-lg: 0 4px 16px rgba(0,0,0,.10);
+  --radius: 12px; --chip-bg: #f0ede5;
+  --score-low: #c0392b; --score-mid: #e67e22; --score-high: #1e7e5b;
+}
+body.dark {
+  --bg: #16161f; --card: #1f1f2f; --border: #383850;
+  --text: #ddd7c8; --muted: #9b917a; --accent: #d49156;
+  --accent-bg: #2a2418; --red: #e0554b; --red-bg: #302020;
+  --blue: #5fa4d0; --blue-bg: #1a2835; --green: #5cb88a; --green-bg: #1a3025;
+  --gold: #d4a017; --gold-bg: #2a2410; --gold-border: #8b6914;
+  --shadow: 0 1px 6px rgba(0,0,0,.30); --shadow-lg: 0 4px 20px rgba(0,0,0,.40);
+  --chip-bg: #2a2a3c; --score-low: #e0554b; --score-mid: #e67e22; --score-high: #5cb88a;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif; background:var(--bg); color:var(--text); line-height:1.65; transition:background .3s,color .3s; }
+
+.hero { text-align:center; padding:48px 20px 24px; border-bottom:1px solid var(--border); background:linear-gradient(180deg,var(--accent-bg),var(--bg)); position:relative; }
+.hero h1 { font-size:28px; font-weight:800; letter-spacing:.04em; }
+.hero .sub { font-size:14px; color:var(--muted); margin-top:6px; }
+.hero .stat-row { display:flex; justify-content:center; gap:28px; margin-top:14px; flex-wrap:wrap; }
+.hero .stat-row .st { text-align:center; }
+.hero .stat-row .st .n { font-size:22px; font-weight:800; color:var(--accent); }
+.hero .stat-row .st .l { font-size:11px; color:var(--muted); }
+.theme-toggle { position:absolute; top:16px; right:20px; width:36px; height:36px; border-radius:50%; border:1px solid var(--border); background:var(--card); cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; }
+
+.steps { display:flex; justify-content:center; gap:40px; padding:14px 20px; border-bottom:1px solid var(--border); background:var(--card); position:sticky; top:0; z-index:10; }
+.step { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); font-weight:600; cursor:pointer; }
+.step .num { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:var(--border); color:var(--muted); font-size:12px; font-weight:700; }
+.step.active .num { background:var(--accent); color:#fff; }
+.step.active { color:var(--accent); }
+.step.done .num { background:var(--green); color:#fff; }
+
+.main { max-width:1100px; margin:0 auto; padding:32px 20px 120px; }
+.section { display:none; }
+.section.visible { display:block; }
+
+.card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:28px 24px; margin-bottom:20px; box-shadow:var(--shadow); }
+.card h3 { font-size:17px; margin-bottom:18px; display:flex; align-items:center; gap:8px; }
+
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+.form-group label { display:block; font-size:12px; font-weight:700; color:var(--muted); margin-bottom:4px; text-transform:uppercase; letter-spacing:.05em; }
+.form-group select, .form-group input[type=text] { width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px; font-family:inherit; background:var(--bg); color:var(--text); }
+.form-group select { appearance:none; -webkit-appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237a6e5a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; }
+.chip-group { display:flex; flex-wrap:wrap; gap:7px; }
+.chip { display:inline-flex; align-items:center; gap:4px; padding:8px 16px; border:1px solid var(--border); border-radius:24px; font-size:13px; cursor:pointer; user-select:none; background:var(--card); transition:all .15s; }
+.chip:hover { border-color:var(--accent); background:var(--accent-bg); }
+.chip.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+.chip input { display:none; }
+
+.btn { display:inline-flex; align-items:center; gap:6px; padding:12px 28px; border-radius:8px; border:none; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; letter-spacing:.03em; transition:all .15s; }
+.btn-primary { background:var(--accent); color:#fff; }
+.btn-primary:hover { opacity:.88; }
+.btn-ghost { background:var(--bg); color:var(--text); border:1px solid var(--border); }
+.btn-ghost:hover { background:var(--accent-bg); }
+.btn-sm { padding:6px 14px; font-size:11px; }
+.btn-row { display:flex; gap:10px; margin-top:20px; flex-wrap:wrap; align-items:center; }
+
+.live-count { display:inline-flex; align-items:center; gap:6px; padding:4px 12px; background:var(--accent-bg); border-radius:16px; font-size:12px; color:var(--accent); font-weight:700; margin-left:8px; }
+
+.assessment-bar { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; padding:14px 16px; background:var(--accent-bg); border-radius:8px; font-size:12px; }
+.assessment-bar .tag { padding:3px 10px; border-radius:14px; font-weight:600; }
+.assessment-bar .tag.good { background:#d4edda; color:#155724; }
+.assessment-bar .tag.warn { background:#fff3cd; color:#856404; }
+.assessment-bar .tag.risk { background:#f8d7da; color:#721c24; }
+
+.results-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px; }
+.results-count { font-size:14px; color:var(--muted); }
+.results-count strong { color:var(--accent); }
+
+.sort-group { display:flex; gap:6px; flex-wrap:wrap; }
+.sort-btn { padding:5px 12px; border-radius:16px; border:1px solid var(--border); background:var(--card); color:var(--muted); font-size:11px; cursor:pointer; font-family:inherit; transition:all .15s; }
+.sort-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+
+.school-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px 20px; margin-bottom:12px; box-shadow:var(--shadow); position:relative; transition:all .2s; }
+.school-card:hover { transform:translateY(-1px); box-shadow:var(--shadow-lg); }
+.school-card.best { border:2px solid var(--gold-border); background:var(--gold-bg); }
+.school-card.best::before { content:'⭐ 最佳匹配'; position:absolute; top:-10px; right:16px; background:var(--gold); color:#fff; font-size:10px; padding:3px 10px; border-radius:10px; font-weight:700; z-index:1; }
+.school-card .sname { font-size:17px; font-weight:700; cursor:pointer; color:var(--accent); text-decoration:underline dotted; text-underline-offset:4px; }
+.school-card .sname:hover { color:var(--red); }
+.school-card .tier-badge { font-size:11px; padding:3px 10px; border-radius:12px; font-weight:700; }
+.t985 { background:var(--red-bg); color:var(--red); }
+.t211 { background:var(--blue-bg); color:var(--blue); }
+.tsyl { background:var(--green-bg); color:var(--green); }
+.tsf { background:var(--chip-bg); color:var(--muted); }
+.school-card .tags { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:6px; }
+.school-card .tag { font-size:10px; padding:2px 9px; border-radius:10px; background:var(--chip-bg); color:var(--muted); }
+.school-card .tag.writing { background:#fde8d0; color:#a0522d; }
+.school-card .tag.dry { background:#f8d7da; color:#721c24; }
+.school-card .tag.wet { background:#d4edda; color:#155724; }
+.school-card .tag.rank { background:#e8e0f0; color:#5b2c8e; }
+.school-card .detail { font-size:11px; color:var(--muted); line-height:1.6; }
+.school-card .detail strong { color:var(--text); }
+.school-card .links { margin-top:6px; display:flex; gap:6px; flex-wrap:wrap; }
+.school-card .links a { font-size:10px; color:var(--accent); text-decoration:none; padding:3px 9px; border:1px solid var(--accent); border-radius:12px; }
+.school-card .links a:hover { background:var(--accent); color:#fff; }
+
+.score-bar-wrap { display:flex; align-items:center; gap:8px; margin-bottom:4px; }
+.score-bar { flex:1; height:6px; background:var(--chip-bg); border-radius:3px; overflow:hidden; }
+.score-bar .fill { height:100%; border-radius:3px; transition:width .4s; }
+.score-num { font-size:13px; font-weight:800; }
+
+.cmp-check { display:inline-flex; align-items:center; gap:4px; font-size:11px; color:var(--muted); cursor:pointer; user-select:none; }
+.cmp-check input { display:none; }
+.cmp-check .box { width:18px; height:18px; border:2px solid var(--border); border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:10px; }
+.cmp-check input:checked + .box { background:var(--accent); border-color:var(--accent); color:#fff; }
+
+.fav-star { cursor:pointer; font-size:18px; user-select:none; transition:transform .15s; display:inline-block; }
+.fav-star:hover { transform:scale(1.3); }
+.fav-star.on { animation:popIn .3s; }
+@keyframes popIn { 0%{transform:scale(0.5);} 70%{transform:scale(1.4);} 100%{transform:scale(1);} }
+
+.target-panel { display:none; max-width:1100px; margin:0 auto 0; padding:0 20px 20px; }
+.target-panel.show { display:block; }
+.target-panel .t-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.target-panel .t-head h3 { font-size:15px; }
+.target-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:8px; }
+.t-item { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:10px 12px; cursor:pointer; transition:all .15s; box-shadow:var(--shadow); display:flex; align-items:center; gap:8px; }
+.t-item:hover { border-color:var(--accent); transform:translateY(-1px); }
+.t-item .t-name { font-size:13px; font-weight:700; flex:1; }
+.t-item .t-score { font-size:11px; font-weight:800; }
+.t-item .t-remove { font-size:14px; cursor:pointer; color:var(--muted); opacity:0; transition:opacity .15s; }
+.t-item:hover .t-remove { opacity:1; }
+.t-item .t-remove:hover { color:var(--red); }
+
+#fav-filter-btn { font-size:11px; padding:5px 12px; border-radius:16px; border:1px solid var(--border); background:var(--card); color:var(--muted); cursor:pointer; transition:all .15s; }
+#fav-filter-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+
+.compare-bar { position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:2px solid var(--accent); padding:10px 20px; z-index:20; display:none; align-items:center; justify-content:space-between; box-shadow:0 -2px 12px rgba(0,0,0,.10); flex-wrap:wrap; gap:8px; }
+.compare-bar.show { display:flex; }
+
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:30; display:none; align-items:center; justify-content:center; padding:20px; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:var(--bg); border-radius:var(--radius); max-width:900px; width:100%; max-height:85vh; overflow-y:auto; box-shadow:0 8px 40px rgba(0,0,0,.25); }
+.modal-box .modal-hd { display:flex; justify-content:space-between; align-items:center; padding:18px 24px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--bg); z-index:1; }
+.modal-close { width:32px; height:32px; border-radius:50%; border:1px solid var(--border); background:var(--card); cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; }
+.cmp-table { width:100%; border-collapse:collapse; font-size:12px; }
+.cmp-table th, .cmp-table td { padding:10px 14px; border-bottom:1px solid var(--border); text-align:center; }
+.cmp-table th { background:var(--accent-bg); font-size:11px; color:var(--muted); }
+.cmp-table td:first-child { text-align:left; color:var(--muted); white-space:nowrap; }
+
+.detail-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:35; display:none; align-items:center; justify-content:center; padding:20px; }
+.detail-overlay.open { display:flex; }
+.detail-box { background:var(--bg); border-radius:var(--radius); max-width:600px; width:100%; max-height:85vh; overflow-y:auto; box-shadow:0 12px 48px rgba(0,0,0,.30); }
+.detail-box .d-hd { padding:18px 24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+.detail-box .d-body { padding:20px 24px; }
+.detail-box .d-body .ds { margin-bottom:14px; }
+.detail-box .d-body .ds h4 { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px; }
+.detail-box .d-body .ds p { font-size:13px; line-height:1.7; }
+
+.back-top { position:fixed; bottom:80px; right:20px; width:40px; height:40px; border-radius:50%; border:1px solid var(--border); background:var(--card); cursor:pointer; font-size:18px; display:none; align-items:center; justify-content:center; z-index:15; box-shadow:var(--shadow); }
+.back-top.show { display:flex; }
+
+.empty-state { text-align:center; padding:80px 20px; color:var(--muted); }
+.empty-state .big { font-size:48px; margin-bottom:12px; }
+
+.strategy-badge { display:inline-flex; align-items:center; gap:2px; font-size:11px; padding:3px 10px; border-radius:12px; font-weight:800; margin-left:6px; }
+.s-chong { background:#f8d7da; color:#721c24; border:1px solid #f1aeb5; }
+.s-wen { background:#fff3cd; color:#856404; border:1px solid #ffe69c; }
+.s-bao { background:#d4edda; color:#155724; border:1px solid #a3cfbb; }
+.strategy-bar { display:flex; gap:10px; align-items:center; padding:10px 16px; background:var(--card); border:1px solid var(--border); border-radius:8px; margin-top:10px; font-size:12px; flex-wrap:wrap; }
+.strategy-bar .st-item { display:flex; align-items:center; gap:4px; font-weight:700; }
+
+.verify-badge { display:inline-flex; align-items:center; gap:3px; font-size:10px; padding:2px 8px; border-radius:10px; font-weight:700; margin-left:4px; }
+.v-official { background:#d4edda; color:#155724; }
+.v-inferred { background:#fff3cd; color:#856404; }
+.v-unknown { background:#f8d7da; color:#721c24; }
+.feedback-link { font-size:10px; color:var(--muted); cursor:pointer; text-decoration:underline dotted; margin-left:6px; }
+.feedback-link:hover { color:var(--accent); }
+.credibility-bar { display:flex; gap:6px; align-items:center; padding:8px 14px; background:var(--card); border:1px solid var(--border); border-radius:8px; margin-bottom:10px; font-size:11px; flex-wrap:wrap; }
+.credibility-bar .c-item { display:flex; align-items:center; gap:3px; }
+
+.quiz-q { font-size:13px; font-weight:700; margin-bottom:8px; color:var(--text); }
+.quiz-opts { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+.quiz-opt { padding:6px 14px; border:1px solid var(--border); border-radius:16px; font-size:12px; cursor:pointer; background:var(--card); transition:all .15s; user-select:none; }
+.quiz-opt:hover { border-color:var(--accent); background:var(--accent-bg); }
+.quiz-opt.picked { background:var(--accent); color:#fff; border-color:var(--accent); }
+.quiz-result { display:none; padding:12px 16px; border-radius:8px; margin-top:12px; font-size:13px; }
+.quiz-result.show { display:block; }
+.quiz-result .rec { font-weight:800; font-size:15px; }
+.quiz-bar-row { display:flex; align-items:center; gap:6px; margin-top:4px; font-size:11px; }
+.quiz-bar-row .qlbl { width:72px; text-align:right; color:var(--muted); flex-shrink:0; }
+.quiz-bar-row .qbar { flex:1; height:10px; background:var(--chip-bg); border-radius:5px; overflow:hidden; }
+.quiz-bar-row .qbar .qf { height:100%; border-radius:5px; background:var(--accent); transition:width .3s; }
+
+.download-hint { background:#d4edda; color:#155724; padding:10px 16px; border-radius:8px; font-size:12px; margin-bottom:16px; text-align:center; }
+
+@media (max-width:768px) {
+  .form-row { grid-template-columns:1fr; }
+  .hero { padding:32px 16px 20px; }
+  .hero h1 { font-size:22px; }
+  .steps { gap:16px; padding:10px 12px; }
+  .step { font-size:10px; gap:4px; }
+  .step .num { width:22px; height:22px; font-size:10px; }
+  .school-card { padding:12px 14px; }
+  .cmp-table th, .cmp-table td { padding:8px; font-size:10px; }
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">🌙</button>
+  <h1>📋 汉语言文学考研择校</h1>
+  <p class="sub">覆盖全国 130+ 院校 · 学科评估 A+ 到 C- · 三步匹配你的目标</p>
+  <div class="stat-row">
+    <div class="st"><div class="n" id="hero-count">132</div><div class="l">收录院校</div></div>
+    <div class="st"><div class="n">7</div><div class="l">覆盖地区</div></div>
+    <div class="st"><div class="n">A+→C-</div><div class="l">学科评估全覆盖</div></div>
+    <div class="st"><div class="n" id="visit-count">...</div><div class="l">累计使用人次</div></div>
+  </div>
+</div>
+
+<nav class="steps" id="steps-nav">
+  <div class="step done" data-step="1"><span class="num">1</span>自我评估</div>
+  <div class="step" data-step="2"><span class="num">2</span>条件筛选</div>
+  <div class="step" data-step="3"><span class="num">3</span>查看结果</div>
+</nav>
+
+<!-- 目标清单 -->
+<div class="target-panel" id="target-panel">
+  <div class="t-head"><h3>⭐ 我的目标清单</h3><span style="font-size:11px;color:var(--muted);">在结果页点击 ⭐ 收藏学校</span></div>
+  <div class="target-grid" id="target-grid"></div>
+</div>
+
+<div class="main">
+
+<!-- STEP 1 -->
+<div class="section visible" id="sec-1">
+  <div class="card"><h3>🧑‍🎓 个人背景</h3>
+    <div class="form-row">
+      <div class="form-group"><label>本科层次</label><select id="self-bg"><option value="">请选择</option><option value="985">985</option><option value="211">211</option><option value="双非一本">双非一本</option><option value="二本">二本</option><option value="专升本">专升本</option></select></div>
+      <div class="form-group"><label>英语水平</label><select id="self-eng"><option value="">请选择</option><option value="强">强 · 六级550+/70+</option><option value="中">中等 · 过四六级/60-70</option><option value="弱">偏弱 · 刚过四级/55-60</option><option value="很弱">很弱 · 四级没过/＜55</option></select></div>
+    </div>
+  </div>
+  <!-- 🎯 方向适配测试 -->
+  <div class="card" id="quiz-card">
+    <h3>🧭 方向适配测试 <span style="font-size:11px;color:var(--muted);font-weight:400;">（可选·帮你找到最适合的方向）</span></h3>
+    <div id="quiz-questions"></div>
+    <div class="quiz-result" id="quiz-result"></div>
+  </div>
+  <div class="card"><h3>🎯 报考方向与偏好</h3>
+    <div class="form-group" style="margin-bottom:14px;"><label>想考的方向（可多选）</label><div class="chip-group" id="self-majors"></div></div>
+    <div class="form-row">
+      <div class="form-group"><label>最擅长的题型</label><select id="self-qtype"><option value="">请选择</option><option value="背诵">📖 背诵默写型</option><option value="论述">📝 分析论述型</option><option value="写作">✍️ 学术写作型</option><option value="说不上来">🤷 说不上来</option></select></div>
+      <div class="form-group"><label>考试恐惧</label><select id="self-fear"><option value="">请选择</option><option value="怕语言学">😰 怕语言学</option><option value="怕作文">😰 怕作文/文学评论</option><option value="怕大综合">😰 怕大综合（范围太广）</option><option value="都不怕">💪 都不怕</option></select></div>
+    </div>
+  </div>
+  <div class="card"><h3>⚖️ 风险与资源</h3>
+    <div class="form-row">
+      <div class="form-group"><label>择校策略（影响匹配评分，不隐藏学校）</label><select id="self-risk"><option value="">请选择</option><option value="冲名校">🔥 冲名校 · 匹配分倾向985/211</option><option value="稳211">⚖️ 稳中求进 · 匹配分倾向211</option><option value="上岸就行">🛟 上岸就行 · 匹配分倾向稳妥选择</option></select></div>
+      <div class="form-group"><label>可用备考时间</label><select id="self-time"><option value="">请选择</option><option value="全职">⏰ 全职8h+/天</option><option value="半职">🕐 半职4-6h/天</option><option value="在职">⏳ 在职＜4h/天</option></select></div>
+    </div>
+    <div class="form-group" style="margin-bottom:14px;"><label>想去的地方（可多选，不选=不限）</label><div class="chip-group" id="self-regions"></div></div>
+    <div class="btn-row"><button class="btn btn-ghost" onclick="resetSelf()">重新填写</button><button class="btn btn-primary" onclick="goStep(2)">下一步 →</button></div>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="section" id="sec-2">
+  <div class="card"><h3>🔍 精准过滤 <span class="live-count" id="live-count" style="display:none;">匹配 <strong id="live-num">0</strong> 所</span></h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">地区偏好自动继承自上一步，修改任意条件实时更新匹配数</p>
+    <div class="form-row">
+      <div class="form-group"><label>学校层次</label><div class="chip-group" id="filter-tier"></div></div>
+      <div class="form-group"><label>所在地区</label><div class="chip-group" id="filter-region"></div></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>公共课给分区</label><select id="filter-grading"><option value="">不限</option><option value="水区">🟢 水区（给分宽松）</option><option value="中等">🟡 中等</option><option value="旱区">🔴 旱区（压分严格）</option></select></div>
+      <div class="form-group"><label>学科评估最低等级</label><select id="filter-rank"><option value="">不限</option><option value="A+">A+ 以上</option><option value="A">A 以上</option><option value="A-">A- 以上</option><option value="B+">B+ 以上</option><option value="B">B 以上</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>考试范围</label><select id="filter-scope"><option value="">不限</option><option value="小综合">📖 小综合（只考文学）</option><option value="大综合">📚 大综合（文学+语言学）</option></select></div>
+      <div class="form-group"><label>是否考作文/论文</label><select id="filter-writing"><option value="">不限</option><option value="有">✍️ 有写作</option><option value="无">❌ 不考作文</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>是否保护一志愿</label><select id="filter-protect"><option value="">不限</option><option value="是">🛡️ 是</option><option value="否">⚠️ 否</option></select></div>
+      <div class="form-group"><label>冲稳保梯度</label><select id="filter-strategy"><option value="">不限</option><option value="冲">🔴 冲刺</option><option value="稳">🟡 稳妥</option><option value="保">🟢 保底</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>关键词搜索</label><input type="text" id="filter-search" placeholder="学校 / 城市 / 教授名"></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-ghost" onclick="goStep(1)">← 返回评估</button><button class="btn btn-ghost" onclick="resetFilters()">重置筛选</button><button class="btn btn-primary" onclick="goStep(3)">查看匹配结果 →</button><span style="font-size:11px;color:var(--muted);cursor:pointer;text-decoration:underline;margin-left:auto;" onclick="clearAll()">清除缓存</span></div>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div class="section" id="sec-3">
+  <div class="assessment-bar" id="assessment-bar"></div>
+  <div class="credibility-bar" id="cred-bar" style="display:none;"></div>
+  <div class="strategy-bar" id="strategy-bar" style="display:none;"></div>
+  <div class="download-hint" id="data-note" style="display:none;">⚠️ 部分数据标注「待核实」或「≈推断」——欢迎反馈纠错</div>
+  <div class="results-bar">
+    <span class="results-count" id="results-count"></span>
+    <div class="sort-group" id="sort-group">
+      <button class="sort-btn active" data-sort="score">匹配度优先</button>
+      <button class="sort-btn" data-sort="rank">学科排名</button>
+      <button class="sort-btn" data-sort="tier">学校层次</button>
+      <button class="sort-btn" data-sort="grading">给分友好</button>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="btn btn-ghost btn-sm" onclick="goStep(2)">← 调整</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportCSV()">📥 导出CSV</button>
+      <button class="btn btn-ghost btn-sm" id="fav-filter-btn" onclick="toggleFavFilter()">⭐ 只看已收藏</button>
+      <button class="btn btn-ghost btn-sm" id="share-btn" onclick="copyLink()">🔗 复制链接</button>
+    </div>
+  </div>
+  <div id="card-grid"></div>
+</div>
+</div>
+
+<!-- 学校详情弹窗 -->
+<div class="detail-overlay" id="detail-dlg" onclick="if(event.target===this)closeDetail()">
+  <div class="detail-box"><div class="d-hd"><h3 id="detail-title"></h3><button class="modal-close" onclick="closeDetail()">✕</button></div><div class="d-body" id="detail-body"></div></div>
+</div>
+
+<!-- 对比弹窗 -->
+<div class="modal-overlay" id="cmp-dlg" onclick="if(event.target===this)closeCmp()">
+  <div class="modal-box"><div class="modal-hd"><h3>🏫 学校对比</h3><button class="modal-close" onclick="closeCmp()">✕</button></div><div style="overflow-x:auto;padding:16px;"><table class="cmp-table" id="cmp-table"></table></div></div>
+</div>
+
+<!-- 底部对比栏 -->
+<div class="compare-bar" id="cmp-bar">
+  <span id="cmp-info">已选 0/3</span>
+  <div style="display:flex;gap:8px;"><button class="btn btn-ghost btn-sm" onclick="clearCmp()">清空</button><button class="btn btn-primary btn-sm" onclick="openCmp()">开始对比</button></div>
+</div>
+
+<button class="back-top" id="back-top" onclick="scrollTo(0,0)">↑</button>
+
+<script>
+// ═══════════ 数据库 ═══════════
+var DB = [
+{n:"北京大学",t:"985",c:"北京",r:"华北",g:"旱区",s:"小综合",w:"无",rank:"A+",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"618文艺理论+832文学基础（文学类）；618+831语言综合（语言类）",enroll:"各方向3-5人/年",comp:"极高",note:"全国第一；八方向齐全；文学类与语言类分开命题",protect:"是",reject:"高",prof:"钱理群、陈平原、戴锦华",yz:"https://yz.chsi.com.cn/school/stu/10001",wx:"https://chinese.pku.edu.cn/"},
+{n:"北京师范大学",t:"985",c:"北京",r:"华北",g:"旱区",s:"大综合",w:"无",rank:"A+",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"723中国文学史+936文学理论与外国文学",enroll:"文艺学5-8人/年",comp:"极高",note:"师范类中文最强；童庆炳文艺学传统",protect:"是",reject:"中",prof:"莫言、张清华",yz:"https://yz.chsi.com.cn/school/stu/10027",wx:"http://wxy.bnu.edu.cn/"},
+{n:"复旦大学",t:"985",c:"上海",r:"华东",g:"旱区",s:"大综合",w:"有",rank:"A",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"705文学语言综合+809中外文学与文艺理论",enroll:"文艺学2-4人/年",comp:"极高",note:"中文A+学科；大综合范围广；学术写作要求",protect:"是",reject:"高",prof:"陈思和、王安忆、郜元宝",yz:"https://yz.chsi.com.cn/school/stu/10246",wx:"http://chinese.fudan.edu.cn/"},
+{n:"华东师范大学",t:"985",c:"上海",r:"华东",g:"旱区",s:"小综合",w:"有",rank:"A",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"847文学基础+618作文（两篇学术作文）",enroll:"文艺学3-5人/年",comp:"极高",note:"唯一985小综合+作文；西方文论国内最好",protect:"是",reject:"高",prof:"朱国华、刘阳、罗岗",yz:"https://yz.chsi.com.cn/school/stu/10269",wx:"https://www.zhwx.ecnu.edu.cn/"},
+{n:"南京大学",t:"985",c:"南京",r:"华东",g:"旱区",s:"大综合",w:"有",rank:"A",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"615文学+935语言及论文写作",enroll:"文艺学3-5人/年",comp:"极高",note:"中文A+学科；论文写作考学术潜质",protect:"是",reject:"高",prof:"丁帆、王彬彬、程章灿",yz:"https://yz.chsi.com.cn/school/stu/10284",wx:"https://chin.nju.edu.cn/"},
+{n:"浙江大学",t:"985",c:"杭州",r:"华东",g:"旱区",s:"大综合",w:"无",rank:"A",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"706中国语言文学综合+808中国语言文学基础",enroll:"文艺学3-5人/年",comp:"极高",note:"C9综合强校；大综合范围广",protect:"是",reject:"中",prof:"徐岱、胡可先",yz:"https://yz.chsi.com.cn/school/stu/10335",wx:"http://www.ch.zju.edu.cn/"},
+{n:"山东大学",t:"985",c:"济南",r:"华东",g:"中等",s:"大综合",w:"无",rank:"A",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"617中国文学史+813综合考试(文)",enroll:"文艺学5-8人/年",comp:"高",note:"文史见长；古代文论方向有特色",protect:"是",reject:"中",prof:"温儒敏、郑春",yz:"https://yz.chsi.com.cn/school/stu/10422",wx:"https://www.lit.sdu.edu.cn/"},
+{n:"四川大学",t:"985",c:"成都",r:"西南",g:"中等",s:"大综合",w:"有",rank:"A",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"635文学评论写作+914中国文学",enroll:"文艺学5-8人/年",comp:"高",note:"成都宜居；文学评论写作为重点",protect:"是",reject:"中",prof:"曹顺庆、李怡",yz:"https://yz.chsi.com.cn/school/stu/10610",wx:"http://www.sculj.cn/"},
+{n:"中国人民大学",t:"985",c:"北京",r:"华北",g:"旱区",s:"大综合",w:"无",rank:"A-",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"626中国文学基础+811文艺理论",enroll:"文艺学3-5人/年",comp:"极高",note:"京城985；中文系小而精",protect:"是",reject:"高",prof:"程光炜、孙郁",yz:"https://yz.chsi.com.cn/school/stu/10002",wx:"http://wenxue.ruc.edu.cn/"},
+{n:"中国社会科学院大学",t:"双一流",c:"北京",r:"华北",g:"旱区",s:"小综合",w:"有",rank:"A-",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"659中国文学史综合+862文艺理论与评论写作",enroll:"文艺学3-5人/年",comp:"高",note:"社科院文学所导师制；学术训练顶级；≈推断",protect:"是",reject:"中",prof:"刘跃进、张江、党圣元",yz:"https://yz.chsi.com.cn/school/stu/14596",wx:"https://literature.cssn.cn/"},
+{n:"南开大学",t:"985",c:"天津",r:"华北",g:"中等",s:"大综合",w:"无",rank:"A-",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"716中国语言文学基础+838文艺理论",enroll:"文艺学3-5人/年",comp:"高",note:"老牌中文强校；古代文学和文论见长",protect:"是",reject:"中",prof:"陈洪、沈立岩",yz:"https://yz.chsi.com.cn/school/stu/10055",wx:"https://wxy.nankai.edu.cn/"},
+{n:"武汉大学",t:"985",c:"武汉",r:"华中",g:"中等",s:"大综合",w:"无",rank:"A-",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"634文学理论与中国现当代文学+839中国古代文学与外国文学",enroll:"文艺学3-5人/年",comp:"极高",note:"中文强校；楚辞/屈原研究重镇",protect:"是",reject:"高",prof:"於可训、李建中",yz:"https://yz.chsi.com.cn/school/stu/10486",wx:"https://chinese.whu.edu.cn/"},
+{n:"中山大学",t:"985",c:"广州",r:"华南",g:"水区",s:"大综合",w:"无",rank:"A-",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"616文学理论+807中外文学史",enroll:"文艺学3-5人/年",comp:"极高",note:"华南985第一；中文系底蕴深厚",protect:"是",reject:"高",prof:"谢有顺、彭玉平",yz:"https://yz.chsi.com.cn/school/stu/10558",wx:"https://chinese.sysu.edu.cn/"},
+{n:"首都师范大学",t:"双一流",c:"北京",r:"华北",g:"旱区",s:"小综合",w:"无",rank:"A-",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"710中国语言文学+811文学理论",enroll:"文艺学8-12人/年",comp:"高",note:"双一流；北京区位；中文实力强于多数211",protect:"是",reject:"中",prof:"陶东风、左东岭",yz:"https://yz.chsi.com.cn/school/stu/10028",wx:"https://wxy.cnu.edu.cn/"},
+{n:"南京师范大学",t:"211",c:"南京",r:"华东",g:"中等",s:"小综合",w:"有",rank:"A-",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"610文学基础+801文艺理论",enroll:"文艺学8-12人/年",comp:"高",note:"211中文强校；招生多；文艺学传统深厚",protect:"是",reject:"中",prof:"朱晓进、骆冬青",yz:"https://yz.chsi.com.cn/school/stu/10319",wx:"http://wxy.njnu.edu.cn/"},
+{n:"清华大学",t:"985",c:"北京",r:"华北",g:"旱区",s:"大综合",w:"有",rank:"B+",majors:"文艺学,中国现当代文学,比较文学与世界文学",exam:"613文学基础+856文学理论与批评",enroll:"中文系总体人数少",comp:"极高",note:"清华文科精品化路线；招生极少；≈推断",protect:"是",reject:"高",prof:"格非、汪晖",yz:"https://yz.chsi.com.cn/school/stu/10003",wx:"https://www.tsinghua.edu.cn/"},
+{n:"北京语言大学",t:"双非",c:"北京",r:"华北",g:"旱区",s:"小综合",w:"有",rank:"B+",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"717文学综合+820文学评论写作",enroll:"文艺学5-8人/年",comp:"中高",note:"语言文学专长校；文学评论写作必考",protect:"是",reject:"中",prof:"韩经太、黄卓越",yz:"https://yz.chsi.com.cn/school/stu/10032",wx:"http://wxy.blcu.edu.cn/"},
+{n:"中央民族大学",t:"985",c:"北京",r:"华北",g:"旱区",s:"大综合",w:"无",rank:"B+",majors:"文艺学,中国古代文学,中国现当代文学",exam:"620文学综合+821文学理论",enroll:"文艺学3-5人/年",comp:"高",note:"北京985；少数民族文学特色；≈推断",protect:"是",reject:"中",prof:"钟进文",yz:"https://yz.chsi.com.cn/school/stu/10052",wx:"https://wenxue.muc.edu.cn/"},
+{n:"同济大学",t:"985",c:"上海",r:"华东",g:"旱区",s:"大综合",w:"有",rank:"B+",majors:"文艺学,中国现当代文学,比较文学与世界文学",exam:"639文学综合+868文学评论写作",enroll:"文艺学2-4人/年",comp:"高",note:"上海985；人文学院中文系；≈推断",protect:"是",reject:"高",prof:"张生、王鸿生",yz:"https://yz.chsi.com.cn/school/stu/10247",wx:"https://sal.tongji.edu.cn/"},
+{n:"吉林大学",t:"985",c:"长春",r:"东北",g:"水区",s:"大综合",w:"无",rank:"B+",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"614文学综合+814语言学综合",enroll:"文艺学3-5人/年",comp:"中高",note:"东北985；给分偏松；性价比高",protect:"是",reject:"中",prof:"张福贵、李志宏",yz:"https://yz.chsi.com.cn/school/stu/10183",wx:"https://wxy.jlu.edu.cn/"},
+{n:"东北师范大学",t:"211",c:"长春",r:"东北",g:"水区",s:"大综合",w:"无",rank:"B+",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"640文学综合+812语言学综合",enroll:"文艺学5-8人/年",comp:"中",note:"211；东北水区；竞争相对温和",protect:"是",reject:"低",prof:"王确、刘雨",yz:"https://yz.chsi.com.cn/school/stu/10200",wx:"http://chinese.nenu.edu.cn/"},
+{n:"上海师范大学",t:"双非",c:"上海",r:"华东",g:"旱区",s:"小综合",w:"有",rank:"B+",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"633文学基础+839写作A",enroll:"文艺学10+人/年",comp:"中",note:"双非但在上海；招生多；性价比高",protect:"是",reject:"低",prof:"杨剑龙",yz:"https://yz.chsi.com.cn/school/stu/10270",wx:"http://wxy.shnu.edu.cn/"},
+{n:"苏州大学",t:"211",c:"苏州",r:"华东",g:"旱区",s:"大综合",w:"无",rank:"B+",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"657文学综合+820文学理论",enroll:"文艺学5-8人/年",comp:"高",note:"苏州区位好；211",protect:"是",reject:"中",prof:"王尧、季进",yz:"https://yz.chsi.com.cn/school/stu/10285",wx:"http://wxy.suda.edu.cn/"},
+{n:"浙江师范大学",t:"双非",c:"金华",r:"华东",g:"中等",s:"大综合",w:"有",rank:"B+",majors:"文艺学,中国古代文学,中国现当代文学",exam:"632文学综合+831文学评论写作",enroll:"现当代文学招生较多",comp:"中",note:"浙江中文强校；保护一志愿；≈推断",protect:"是",reject:"低",prof:"高玉、张法",yz:"https://yz.chsi.com.cn/school/stu/10345",wx:"http://wxy.zjnu.edu.cn/"},
+{n:"福建师范大学",t:"双非",c:"福州",r:"华东",g:"中等",s:"小综合",w:"有",rank:"B+",majors:"文艺学,中国古代文学,中国现当代文学",exam:"626文学综合+820文学评论写作",enroll:"现当代文学6-10人/年",comp:"中",note:"福建中文最强校；≈推断",protect:"是",reject:"低",prof:"孙绍振、汪文顶",yz:"https://yz.chsi.com.cn/school/stu/10394",wx:"http://wxy.fjnu.edu.cn/"},
+{n:"山东师范大学",t:"双非",c:"济南",r:"华东",g:"中等",s:"小综合",w:"有",rank:"B+",majors:"文艺学,中国古代文学,中国现当代文学",exam:"633文学综合+825文学评论写作",enroll:"文艺学5-8人/年",comp:"中",note:"山东师范强校；≈推断",protect:"是",reject:"低",prof:"魏建、杨守森",yz:"https://yz.chsi.com.cn/school/stu/10445",wx:"http://www.wxy.sdnu.edu.cn/"},
+{n:"河南大学",t:"双非",c:"开封",r:"华中",g:"中等",s:"大综合",w:"无",rank:"B+",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"615文学综合+810中国语言文学",enroll:"文艺学5-8人/年",comp:"中",note:"百年老校；中文底蕴深厚",protect:"是",reject:"低",prof:"关爱和、耿占春",yz:"https://yz.chsi.com.cn/school/stu/10475",wx:"https://wxy.henu.edu.cn/"},
+{n:"华中师范大学",t:"211",c:"武汉",r:"华中",g:"中等",s:"大综合",w:"无",rank:"B+",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"710中国语言文学基础+824语言与文学理论",enroll:"文艺学8-12人/年",comp:"高",note:"211中文强校；文艺学胡亚敏等名师",protect:"是",reject:"中",prof:"胡亚敏、王泽龙",yz:"https://yz.chsi.com.cn/school/stu/10511",wx:"http://chinese.ccnu.edu.cn/"},
+{n:"暨南大学",t:"211",c:"广州",r:"华南",g:"水区",s:"大综合",w:"无",rank:"B+",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"705语言文学基础+807阅读与写作",enroll:"文艺学6-10人/年",comp:"高",note:"广州211；海外华文文学特色；水区",protect:"是",reject:"中",prof:"蒋述卓、王列耀",yz:"https://yz.chsi.com.cn/school/stu/10559",wx:"https://zwx.jnu.edu.cn/"},
+{n:"西南大学",t:"211",c:"重庆",r:"西南",g:"中等",s:"大综合",w:"有",rank:"B+",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"626文论与写作+853中外文学史",enroll:"文艺学6-10人/年",comp:"中高",note:"重庆211；难度适中",protect:"是",reject:"中",prof:"王本朝、寇鹏程",yz:"https://yz.chsi.com.cn/school/stu/10635",wx:"http://wxy.swu.edu.cn/"},
+{n:"陕西师范大学",t:"211",c:"西安",r:"西北",g:"中等",s:"大综合",w:"无",rank:"B+",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"716文学综合+816语言综合",enroll:"文艺学6-10人/年",comp:"中高",note:"西北中文重镇；古代文学和文论有传统",protect:"是",reject:"中",prof:"李继凯、张新科",yz:"https://yz.chsi.com.cn/school/stu/10718",wx:"http://www.lit.snnu.edu.cn/"},
+{n:"厦门大学",t:"985",c:"厦门",r:"华东",g:"中等",s:"大综合",w:"有",rank:"B",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"701语言文学基础+802文学理论与文学评论写作",enroll:"文艺学3-5人/年",comp:"高",note:"985；文学评论写作；厦门宜居",protect:"是",reject:"中",prof:"周宁",yz:"https://yz.chsi.com.cn/school/stu/10384",wx:"https://chinese.xmu.edu.cn/"},
+{n:"东南大学",t:"985",c:"南京",r:"华东",g:"旱区",s:"大综合",w:"无",rank:"B",majors:"文艺学,中国古代文学,中国现当代文学",exam:"639文学综合+868文学理论",enroll:"文艺学2-4人/年",comp:"高",note:"南京985；≈推断",protect:"是",reject:"中",prof:"王珂、乔光辉",yz:"https://yz.chsi.com.cn/school/stu/10286",wx:"https://wxy.seu.edu.cn/"},
+{n:"中南大学",t:"985",c:"长沙",r:"华中",g:"中等",s:"大综合",w:"无",rank:"B",majors:"文艺学,中国古代文学,中国现当代文学",exam:"618文学综合+822文学理论",enroll:"文艺学3-5人/年",comp:"中高",note:"长沙985；文学与新闻传播学院；≈推断",protect:"是",reject:"中",prof:"欧阳友权、阎真",yz:"https://yz.chsi.com.cn/school/stu/10533",wx:"https://wxy.csu.edu.cn/"},
+{n:"重庆大学",t:"985",c:"重庆",r:"西南",g:"中等",s:"大综合",w:"有",rank:"B",majors:"文艺学,中国古代文学,中国现当代文学",exam:"633文学综合+881文学评论写作",enroll:"文艺学2-4人/年",comp:"中高",note:"重庆985；≈推断",protect:"是",reject:"中",prof:"周志强",yz:"https://yz.chsi.com.cn/school/stu/10611",wx:"http://ias.cqu.edu.cn/"},
+{n:"西安交通大学",t:"985",c:"西安",r:"西北",g:"中等",s:"大综合",w:"无",rank:"B",majors:"文艺学,中国古代文学,中国现当代文学",exam:"616文学综合+828文学理论",enroll:"文艺学2-4人/年",comp:"中高",note:"西安985；≈推断",protect:"是",reject:"中",prof:"李慧",yz:"https://yz.chsi.com.cn/school/stu/10698",wx:"http://rwxy.xjtu.edu.cn/"},
+{n:"华南师范大学",t:"211",c:"广州",r:"华南",g:"水区",s:"小综合-偏窄",w:"无",rank:"B",majors:"文艺学,中国古代文学,中国现当代文学",exam:"708文学基础（仅古代+现当代）+808文学理论",enroll:"文艺学8-12人/年",comp:"高→极高",note:"范围最小但报录比飙至1:20+；水区公共课给分松",protect:"否",reject:"高",prof:"陈少华、段吉方",yz:"https://yz.chsi.com.cn/school/stu/10574",wx:"http://wxy.scnu.edu.cn/"},
+{n:"湖南师范大学",t:"211",c:"长沙",r:"华中",g:"中等",s:"大综合",w:"无",rank:"B",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"716文学理论与文学评论+829文学史",enroll:"文艺学8-10人/年",comp:"中高",note:"长沙211；难度适中",protect:"是",reject:"中",prof:"赵炎秋、肖百容",yz:"https://yz.chsi.com.cn/school/stu/10542",wx:"https://wxy.hunnu.edu.cn/"},
+{n:"上海大学",t:"211",c:"上海",r:"华东",g:"旱区",s:"小综合",w:"有",rank:"B",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"617作文+819文学史",enroll:"文艺学5-8人/年",comp:"高",note:"上海211；作文分值大；创意写作特色",protect:"是",reject:"中",prof:"葛红兵",yz:"https://yz.chsi.com.cn/school/stu/10280",wx:"https://cla.shu.edu.cn/"},
+{n:"西北大学",t:"211",c:"西安",r:"西北",g:"中等",s:"大综合",w:"无",rank:"B",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"616文学综合+811文学理论",enroll:"文艺学5-8人/年",comp:"中高",note:"西安211；古代文学见长",protect:"是",reject:"中",prof:"李浩、段建军",yz:"https://yz.chsi.com.cn/school/stu/10697",wx:"https://wxy.nwu.edu.cn/"},
+{n:"扬州大学",t:"双非",c:"扬州",r:"华东",g:"中等",s:"小综合",w:"有",rank:"B",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"617文学综合+815文学评论写作",enroll:"文艺学5-8人/年",comp:"中",note:"双非中文强校；有博士点；文学评论写作",protect:"是",reject:"低",prof:"姚文放",yz:"https://yz.chsi.com.cn/school/stu/11117",wx:"http://wxy.yzu.edu.cn/"},
+{n:"福州大学",t:"211",c:"福州",r:"华东",g:"中等",s:"大综合",w:"无",rank:"B",majors:"文艺学,中国古代文学,中国现当代文学",exam:"620文学综合+825文学理论",enroll:"文艺学3-5人/年",comp:"中",note:"福州211；≈推断",protect:"是",reject:"中",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10386",wx:"http://wxy.fzu.edu.cn/"},
+{n:"天津师范大学",t:"双非",c:"天津",r:"华北",g:"中等",s:"小综合",w:"有",rank:"B",majors:"文艺学,中国古代文学,中国现当代文学",exam:"631文学综合+829文学评论写作",enroll:"文艺学5-8人/年",comp:"中",note:"天津师范强校；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10065",wx:"http://wxy.tjnu.edu.cn/"},
+{n:"河北大学",t:"双非",c:"保定",r:"华北",g:"中等",s:"小综合",w:"无",rank:"B",majors:"文艺学,中国古代文学,中国现当代文学",exam:"612文学综合+818文学理论",enroll:"文艺学5-8人/年",comp:"中低",note:"河北中文强校；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10075",wx:"http://wxy.hbu.edu.cn/"},
+{n:"河北师范大学",t:"双非",c:"石家庄",r:"华北",g:"中等",s:"小综合",w:"无",rank:"B",majors:"文艺学,中国古代文学,中国现当代文学",exam:"613文学综合+819文学理论",enroll:"文艺学5-8人/年",comp:"中低",note:"师范类中文；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10094",wx:"http://wxy.hebtu.edu.cn/"},
+{n:"黑龙江大学",t:"双非",c:"哈尔滨",r:"东北",g:"水区",s:"大综合",w:"无",rank:"B",majors:"文艺学,中国古代文学,中国现当代文学",exam:"614文学综合+814语言学综合",enroll:"文艺学5-8人/年",comp:"中低",note:"东北水区；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10212",wx:"http://wxy.hlju.edu.cn/"},
+{n:"哈尔滨师范大学",t:"双非",c:"哈尔滨",r:"东北",g:"水区",s:"小综合",w:"无",rank:"B",majors:"文艺学,中国古代文学,中国现当代文学",exam:"611文学综合+811文学理论",enroll:"文艺学3-5人/年",comp:"低",note:"保护一志愿；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10231",wx:"http://wxy.hrbnu.edu.cn/"},
+{n:"江苏师范大学",t:"双非",c:"徐州",r:"华东",g:"中等",s:"小综合",w:"无",rank:"B",majors:"文艺学,中国古代文学,中国现当代文学",exam:"612文学综合+812文学理论",enroll:"文艺学3-5人/年",comp:"低",note:"保护一志愿；过线即录；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10320",wx:"http://wxy.jsnu.edu.cn/"},
+{n:"广西师范大学",t:"双非",c:"桂林",r:"华南",g:"水区",s:"小综合",w:"无",rank:"B",majors:"文艺学,中国古代文学,中国现当代文学",exam:"614文学综合+814文学理论",enroll:"文艺学5-8人/年",comp:"中低",note:"桂林；少数民族文学特色；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10602",wx:"http://www.lit.gxnu.edu.cn/"},
+{n:"四川师范大学",t:"双非",c:"成都",r:"西南",g:"中等",s:"小综合",w:"无",rank:"B",majors:"文艺学,中国古代文学,中国现当代文学",exam:"610文学综合+810文学理论",enroll:"文艺学5-8人/年",comp:"中",note:"成都师范强校；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10636",wx:"http://wxy.sicnu.edu.cn/"},
+{n:"西北师范大学",t:"双非",c:"兰州",r:"西北",g:"水区",s:"小综合",w:"无",rank:"B",majors:"文艺学,中国古代文学,中国现当代文学",exam:"611文学综合+811文学理论",enroll:"文艺学5-8人/年",comp:"低",note:"西北水区；复试刷人少；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10736",wx:"https://wxy.nwnu.edu.cn/"},
+{n:"内蒙古大学",t:"211",c:"呼和浩特",r:"华北",g:"水区",s:"大综合",w:"无",rank:"B",majors:"文艺学,中国古代文学,中国现当代文学",exam:"616文学综合+816语言学综合",enroll:"文艺学3-5人/年",comp:"中低",note:"211；少数民族语言文学特色；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10126",wx:"https://wxy.imu.edu.cn/"},
+{n:"上海交通大学",t:"985",c:"上海",r:"华东",g:"旱区",s:"大综合",w:"有",rank:"B-",majors:"文艺学,中国古代文学,中国现当代文学",exam:"621文学综合+836文学评论写作",enroll:"中文系规模小",comp:"极高",note:"C9名校；≈推断",protect:"是",reject:"高",prof:"王宁",yz:"https://yz.chsi.com.cn/school/stu/10248",wx:"https://shss.sjtu.edu.cn/"},
+{n:"华中科技大学",t:"985",c:"武汉",r:"华中",g:"中等",s:"大综合",w:"无",rank:"B-",majors:"文艺学,中国现当代文学",exam:"619文学综合+830文学理论",enroll:"中文系规模小",comp:"高",note:"985工科强校中的中文系；≈推断",protect:"是",reject:"中",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10487",wx:"http://humanity.hust.edu.cn/"},
+{n:"兰州大学",t:"985",c:"兰州",r:"西北",g:"水区",s:"大综合",w:"无",rank:"B-",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"621文学综合+830文学理论",enroll:"文艺学5-8人/年",comp:"中高",note:"西北985；水区给分偏松；敦煌学特色",protect:"是",reject:"中",prof:"程金城、张进",yz:"https://yz.chsi.com.cn/school/stu/10730",wx:"http://chinese.lzu.edu.cn/"},
+{n:"中国传媒大学",t:"211",c:"北京",r:"华北",g:"旱区",s:"大综合",w:"有",rank:"B-",majors:"文艺学,中国现当代文学",exam:"704文学综合+808文学评论写作",enroll:"文艺学3-5人/年",comp:"高",note:"211；影视与文学交叉；≈推断",protect:"是",reject:"中",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10033",wx:"https://wxy.cuc.edu.cn/"},
+{n:"辽宁大学",t:"211",c:"沈阳",r:"东北",g:"水区",s:"大综合",w:"无",rank:"B-",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"617文学综合+825语言综合",enroll:"文艺学5-8人/年",comp:"中",note:"沈阳211；东北水区",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10140",wx:"http://wxy.lnu.edu.cn/"},
+{n:"安徽大学",t:"211",c:"合肥",r:"华东",g:"中等",s:"大综合",w:"无",rank:"B-",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"616文学综合+810中国语言文学",enroll:"文艺学5-8人/年",comp:"中高",note:"合肥211",protect:"是",reject:"中",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10357",wx:"http://wxy.ahu.edu.cn/"},
+{n:"云南大学",t:"211",c:"昆明",r:"西南",g:"中等",s:"大综合",w:"无",rank:"B-",majors:"文艺学,中国古代文学,中国现当代文学",exam:"617文学综合+821文学理论",enroll:"文艺学5-8人/年",comp:"中",note:"211；昆明宜居；≈推断",protect:"是",reject:"中",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10673",wx:"http://www.wxy.ynu.edu.cn/"},
+{n:"新疆大学",t:"211",c:"乌鲁木齐",r:"西北",g:"水区",s:"大综合",w:"无",rank:"B-",majors:"文艺学,中国古代文学,中国现当代文学",exam:"616文学综合+816文学理论",enroll:"文艺学3-5人/年",comp:"低",note:"西北211；竞争低；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10755",wx:"http://wxy.xju.edu.cn/"},
+{n:"山西大学",t:"双非",c:"太原",r:"华北",g:"中等",s:"小综合",w:"无",rank:"B-",majors:"中国古代文学,中国现当代文学",exam:"611文学综合+811文学理论",enroll:"文艺学3-5人/年",comp:"中低",note:"百年老校；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10108",wx:"http://wxy.sxu.edu.cn/"},
+{n:"曲阜师范大学",t:"双非",c:"曲阜",r:"华东",g:"中等",s:"小综合",w:"无",rank:"B-",majors:"中国古代文学,中国现当代文学",exam:"610文学综合+810文学理论",enroll:"文艺学3-5人/年",comp:"低",note:"考研名校；师范特色；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10446",wx:"https://wxy.qfnu.edu.cn/"},
+{n:"湖北大学",t:"双非",c:"武汉",r:"华中",g:"中等",s:"小综合",w:"无",rank:"B-",majors:"文艺学,中国古代文学,中国现当代文学",exam:"612文学综合+812文学理论",enroll:"文艺学3-5人/年",comp:"中低",note:"省属重点；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10512",wx:"http://wxy.hubu.edu.cn/"},
+{n:"安徽师范大学",t:"双非",c:"芜湖",r:"华东",g:"中等",s:"小综合",w:"无",rank:"B-",majors:"文艺学,中国古代文学,中国现当代文学",exam:"610文学综合+810文学理论",enroll:"文艺学3-5人/年",comp:"低",note:"安徽师范强校；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10370",wx:"https://wxy.ahnu.edu.cn/"},
+{n:"江西师范大学",t:"双非",c:"南昌",r:"华中",g:"中等",s:"小综合",w:"无",rank:"B-",majors:"文艺学,中国古代文学,中国现当代文学",exam:"611文学综合+811文学理论",enroll:"文艺学3-5人/年",comp:"中低",note:"江西中文强校；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10414",wx:"http://wxy.jxnu.edu.cn/"},
+{n:"广西民族大学",t:"双非",c:"南宁",r:"华南",g:"水区",s:"小综合",w:"无",rank:"B-",majors:"文艺学,中国现当代文学",exam:"610文学综合+810文学理论",enroll:"文艺学3-5人/年",comp:"低",note:"少数民族文学；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10608",wx:"http://wxy.gxun.edu.cn/"},
+{n:"山西师范大学",t:"双非",c:"太原",r:"华北",g:"中等",s:"小综合",w:"无",rank:"B-",majors:"文艺学,中国古代文学,中国现当代文学",exam:"610文学综合+810文学理论",enroll:"文艺学3-5人/年",comp:"低",note:"已迁太原；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10118",wx:"http://wxy.sxnu.edu.cn/"},
+{n:"青海师范大学",t:"双非",c:"西宁",r:"西北",g:"水区",s:"小综合",w:"无",rank:"B-",majors:"中国古代文学,中国现当代文学",exam:"610文学综合+810文学理论",enroll:"文艺学3-5人/年",comp:"低",note:"青海唯一师范；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10746",wx:"http://wxy.qhnu.edu.cn/"},
+{n:"信阳师范大学",t:"双非",c:"信阳",r:"华中",g:"中等",s:"小综合",w:"无",rank:"C+",majors:"中国古代文学,中国现当代文学",exam:"610文学综合+810文学理论",enroll:"文艺学3-5人/年",comp:"低",note:"河南地方师范；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10477",wx:"http://wxy.xynu.edu.cn/"},
+{n:"闽南师范大学",t:"双非",c:"漳州",r:"华东",g:"中等",s:"小综合",w:"无",rank:"C+",majors:"中国古代文学,中国现当代文学",exam:"610文学综合+810文学理论",enroll:"文艺学3-5人/年",comp:"低",note:"福建地方师范；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10402",wx:"http://wxy.mnnu.edu.cn/"},
+{n:"湖北师范大学",t:"双非",c:"黄石",r:"华中",g:"中等",s:"小综合",w:"无",rank:"C+",majors:"中国古代文学,中国现当代文学",exam:"610文学综合+810文学理论",enroll:"文艺学3-5人/年",comp:"低",note:"省属师范；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10513",wx:"http://wxy.hbnu.edu.cn/"},
+{n:"长春师范大学",t:"双非",c:"长春",r:"东北",g:"水区",s:"小综合",w:"无",rank:"C+",majors:"中国古代文学,中国现当代文学",exam:"610文学综合+810文学理论",enroll:"文艺学3-5人/年",comp:"低",note:"吉林地方师范；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10205",wx:"http://wxy.ccsfu.edu.cn/"},
+{n:"赣南师范大学",t:"双非",c:"赣州",r:"华中",g:"中等",s:"小综合",w:"无",rank:"C",majors:"中国古代文学,中国现当代文学",exam:"610文学综合+810文学理论",enroll:"文艺学3-5人/年",comp:"低",note:"江西地方师范；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10418",wx:"http://wxy.gnnu.edu.cn/"},
+{n:"西藏民族大学",t:"双非",c:"咸阳",r:"西北",g:"水区",s:"小综合",w:"无",rank:"C",majors:"中国古代文学",exam:"610文学综合+810文学理论",enroll:"文艺学3-5人/年",comp:"低",note:"地处陕西咸阳；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10695",wx:"http://wxy.xzmu.edu.cn/"},
+{n:"淮北师范大学",t:"双非",c:"淮北",r:"华东",g:"中等",s:"小综合",w:"无",rank:"C",majors:"中国古代文学,中国现当代文学",exam:"610文学综合+810文学理论",enroll:"文艺学3-5人/年",comp:"低",note:"安徽地方师范；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10373",wx:"http://wxy.chnu.edu.cn/"},
+{n:"安庆师范大学",t:"双非",c:"安庆",r:"华东",g:"中等",s:"小综合",w:"无",rank:"C",majors:"中国古代文学,中国现当代文学",exam:"610文学综合+810文学理论",enroll:"文艺学3-5人/年",comp:"低",note:"安徽地方师范；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10372",wx:"http://wxy.aqnu.edu.cn/"},
+{n:"宁夏师范学院",t:"双非",c:"固原",r:"西北",g:"水区",s:"小综合",w:"无",rank:"C-",majors:"中国古代文学,中国现当代文学",exam:"610文学综合+810文学理论",enroll:"文艺学3-5人/年",comp:"低",note:"宁夏唯一师范；≈推断",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10753",wx:"http://wxy.nxtu.cn/"},
+{n:"北京外国语大学",t:"211",c:"北京",r:"华北",g:"旱区",s:"待核实",w:"待核实",rank:"C+",majors:"比较文学与世界文学",exam:"待核实",enroll:"待核实",comp:"高",note:"外语强校；比较文学优势",protect:"是",reject:"中",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10030",wx:"https://chinese.bfsu.edu.cn/"},
+{n:"上海外国语大学",t:"211",c:"上海",r:"华东",g:"旱区",s:"待核实",w:"待核实",rank:"C+",majors:"比较文学与世界文学",exam:"待核实",enroll:"待核实",comp:"高",note:"外语强校；比较文学与世界文学",protect:"是",reject:"中",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10271",wx:"http://www.ses.shisu.edu.cn/"},
+{n:"郑州大学",t:"211",c:"郑州",r:"华中",g:"中等",s:"大综合",w:"无",rank:"C+",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"618文学综合+814中国语言文学综合",enroll:"文艺学5-8人/年",comp:"中高",note:"河南唯一211；招生稳定",protect:"是",reject:"中",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10459",wx:"http://www5.zzu.edu.cn/wxy/"},
+{n:"南昌大学",t:"211",c:"南昌",r:"华中",g:"中等",s:"待核实",w:"待核实",rank:"C+",majors:"文艺学,中国古代文学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"中高",note:"江西唯一211",protect:"是",reject:"中",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10403",wx:"http://wxy.ncu.edu.cn/"},
+{n:"湘潭大学",t:"双一流",c:"湘潭",r:"华中",g:"中等",s:"待核实",w:"待核实",rank:"C+",majors:"文艺学,中国古代文学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"中低",note:"双一流；毛研中心",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10530",wx:"https://wxy.xtu.edu.cn/"},
+{n:"杭州师范大学",t:"双非",c:"杭州",r:"华东",g:"旱区",s:"待核实",w:"待核实",rank:"C+",majors:"文艺学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"中",note:"杭州区位好",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10346",wx:"http://rwxy.hznu.edu.cn/"},
+{n:"重庆师范大学",t:"双非",c:"重庆",r:"西南",g:"中等",s:"待核实",w:"待核实",rank:"C+",majors:"文艺学,中国古代文学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"中低",note:"重庆师范强校",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10637",wx:"http://wxy.cqnu.edu.cn/"},
+{n:"西南民族大学",t:"双非",c:"成都",r:"西南",g:"中等",s:"待核实",w:"待核实",rank:"C+",majors:"文艺学,中国古代文学,比较文学与世界文学",exam:"待核实",enroll:"待核实",comp:"中低",note:"民族文学特色",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10656",wx:"http://wxy.swun.edu.cn/"},
+{n:"贵州师范大学",t:"双非",c:"贵阳",r:"西南",g:"水区",s:"待核实",w:"待核实",rank:"C+",majors:"文艺学,中国古代文学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"低",note:"贵州师范",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10663",wx:"http://wxy.gznu.edu.cn/"},
+{n:"西北民族大学",t:"双非",c:"兰州",r:"西北",g:"水区",s:"待核实",w:"待核实",rank:"C+",majors:"文艺学,中国古代文学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"低",note:"西北水区",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10742",wx:"http://wxy.xbmu.edu.cn/"},
+{n:"海南师范大学",t:"双非",c:"海口",r:"华南",g:"水区",s:"待核实",w:"待核实",rank:"C+",majors:"文艺学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"低",note:"海南唯一师范",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/11658",wx:"http://wxy.hainnu.edu.cn/"},
+{n:"新疆师范大学",t:"双非",c:"乌鲁木齐",r:"西北",g:"水区",s:"待核实",w:"待核实",rank:"C+",majors:"中国古代文学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"低",note:"西北水区",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10762",wx:"http://wxy.xjnu.edu.cn/"},
+{n:"沈阳师范大学",t:"双非",c:"沈阳",r:"东北",g:"水区",s:"待核实",w:"待核实",rank:"C+",majors:"文艺学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"低",note:"东北水区",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10166",wx:"http://wxy.synu.edu.cn/"},
+{n:"辽宁师范大学",t:"双非",c:"大连",r:"东北",g:"水区",s:"待核实",w:"待核实",rank:"C+",majors:"文艺学,中国古代文学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"低",note:"大连区位",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10165",wx:"http://wxy.lnnu.edu.cn/"},
+{n:"内蒙古师范大学",t:"双非",c:"呼和浩特",r:"华北",g:"水区",s:"待核实",w:"待核实",rank:"C+",majors:"文艺学,中国古代文学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"低",note:"内蒙古师范",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10135",wx:"http://wxy.imnu.edu.cn/"},
+{n:"中国海洋大学",t:"985",c:"青岛",r:"华东",g:"中等",s:"待核实",w:"待核实",rank:"C",majors:"文艺学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"中高",note:"985；青岛；海洋文化特色",protect:"是",reject:"中",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10423",wx:"http://wxy.ouc.edu.cn/"},
+{n:"湖南大学",t:"985",c:"长沙",r:"华中",g:"中等",s:"待核实",w:"待核实",rank:"C",majors:"文艺学,中国古代文学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"中高",note:"985综合；岳麓书院文化",protect:"是",reject:"中",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10532",wx:"http://wxy.hnu.edu.cn/"},
+{n:"广西大学",t:"211",c:"南宁",r:"华南",g:"水区",s:"待核实",w:"待核实",rank:"C",majors:"文艺学,中国古代文学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"中低",note:"广西唯一211",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10593",wx:"http://wxy.gxu.edu.cn/"},
+{n:"西南交通大学",t:"211",c:"成都",r:"西南",g:"中等",s:"待核实",w:"待核实",rank:"C",majors:"文艺学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"中高",note:"211工科校中的文科",protect:"是",reject:"中",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10613",wx:"https://rwxy.swjtu.edu.cn/"},
+{n:"深圳大学",t:"双非",c:"深圳",r:"华南",g:"水区",s:"大综合",w:"无",rank:"C",majors:"文艺学,中国古典文献学,中国古代文学,中国现当代文学,比较文学与世界文学",exam:"709中国文学史+812文学理论",enroll:"中国语言文学10+人/年",comp:"中高",note:"深圳区位极好；经费充足；发展快",protect:"是",reject:"中",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10590",wx:"https://wxy.szu.edu.cn/"},
+{n:"广州大学",t:"双非",c:"广州",r:"华南",g:"水区",s:"待核实",w:"待核实",rank:"C",majors:"文艺学,中国古代文学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"中",note:"广州区位",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/11078",wx:"http://wxy.gzhu.edu.cn/"},
+{n:"广东外语外贸大学",t:"双非",c:"广州",r:"华南",g:"水区",s:"待核实",w:"待核实",rank:"C",majors:"文艺学,比较文学与世界文学",exam:"待核实",enroll:"待核实",comp:"中",note:"广州；比较文学特色",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/11846",wx:"http://wxy.gdufs.edu.cn/"},
+{n:"华侨大学",t:"双非",c:"泉州/厦门",r:"华东",g:"中等",s:"待核实",w:"待核实",rank:"C",majors:"文艺学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"中低",note:"侨校特色；海外华文文学",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10385",wx:"https://wxy.hqu.edu.cn/"},
+{n:"温州大学",t:"双非",c:"温州",r:"华东",g:"中等",s:"待核实",w:"待核实",rank:"C",majors:"文艺学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"中低",note:"温州区位",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10351",wx:"http://wxy.wzu.edu.cn/"},
+{n:"济南大学",t:"双非",c:"济南",r:"华东",g:"中等",s:"待核实",w:"待核实",rank:"C",majors:"文艺学,中国古代文学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"低",note:"山东省属",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10427",wx:"http://wxy.ujn.edu.cn/"},
+{n:"青岛大学",t:"双非",c:"青岛",r:"华东",g:"中等",s:"待核实",w:"待核实",rank:"C",majors:"文艺学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"中低",note:"青岛区位好",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/11065",wx:"http://wxy.qdu.edu.cn/"},
+{n:"中南民族大学",t:"双非",c:"武汉",r:"华中",g:"中等",s:"待核实",w:"待核实",rank:"C",majors:"文艺学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"低",note:"民族院校",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10524",wx:"https://www.scuec.edu.cn/wxy/"},
+{n:"西华师范大学",t:"双非",c:"南充",r:"西南",g:"中等",s:"待核实",w:"待核实",rank:"C",majors:"中国古代文学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"低",note:"四川地方师范",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10638",wx:"http://wxy.cwnu.edu.cn/"},
+{n:"云南师范大学",t:"双非",c:"昆明",r:"西南",g:"中等",s:"待核实",w:"待核实",rank:"C",majors:"文艺学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"低",note:"西南联大旧址",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10681",wx:"http://wxy.ynnu.edu.cn/"},
+{n:"北京第二外国语学院",t:"双非",c:"北京",r:"华北",g:"旱区",s:"待核实",w:"待核实",rank:"C",majors:"比较文学与世界文学",exam:"待核实",enroll:"待核实",comp:"中",note:"外语院校",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10031",wx:"http://wxy.bisu.edu.cn/"},
+{n:"浙江工业大学",t:"双非",c:"杭州",r:"华东",g:"旱区",s:"待核实",w:"待核实",rank:"C",majors:"中国现当代文学",exam:"待核实",enroll:"待核实",comp:"中",note:"杭州工科校中的文科",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10337",wx:"http://www.rwxy.zjut.edu.cn/"},
+{n:"三峡大学",t:"双非",c:"宜昌",r:"华中",g:"中等",s:"待核实",w:"待核实",rank:"C",majors:"文艺学,中国古代文学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"低",note:"湖北地方院校",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/11075",wx:"http://wxy.ctgu.edu.cn/"},
+{n:"吉林师范大学",t:"双非",c:"四平",r:"东北",g:"水区",s:"待核实",w:"待核实",rank:"C",majors:"中国古代文学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"低",note:"吉林师范",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10203",wx:"http://wxy.jlnu.edu.cn/"},
+{n:"南通大学",t:"双非",c:"南通",r:"华东",g:"中等",s:"待核实",w:"待核实",rank:"C-",majors:"中国古代文学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"低",note:"江苏地方院校",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10304",wx:"http://wxy.ntu.edu.cn/"},
+{n:"鲁东大学",t:"双非",c:"烟台",r:"华东",g:"中等",s:"待核实",w:"待核实",rank:"C-",majors:"中国古代文学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"低",note:"烟台师范底子",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10451",wx:"http://wxy.ldu.edu.cn/"},
+{n:"河南师范大学",t:"双非",c:"新乡",r:"华中",g:"中等",s:"待核实",w:"待核实",rank:"C-",majors:"中国古代文学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"低",note:"河南师范强校",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10476",wx:"http://wxy.htu.edu.cn/"},
+{n:"延边大学",t:"211",c:"延吉",r:"东北",g:"水区",s:"待核实",w:"待核实",rank:"C-",majors:"文艺学,比较文学与世界文学",exam:"待核实",enroll:"待核实",comp:"低",note:"211；朝鲜-韩国文学特色",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10184",wx:"http://wxy.ybu.edu.cn/"},
+{n:"宁夏大学",t:"211",c:"银川",r:"西北",g:"水区",s:"待核实",w:"待核实",rank:"C-",majors:"中国古代文学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"低",note:"西北211；竞争低",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10749",wx:"http://wxy.nxu.edu.cn/"},
+{n:"海南大学",t:"211",c:"海口",r:"华南",g:"水区",s:"待核实",w:"待核实",rank:"C-",majors:"文艺学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"低",note:"海南唯一211",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10589",wx:"http://wxy.hainanu.edu.cn/"},
+{n:"渤海大学",t:"双非",c:"锦州",r:"东北",g:"水区",s:"待核实",w:"待核实",rank:"C-",majors:"中国古代文学,中国现当代文学",exam:"待核实",enroll:"待核实",comp:"低",note:"辽宁地方院校",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10167",wx:"http://wxy.bhu.edu.cn/"},
+{n:"天津外国语大学",t:"双非",c:"天津",r:"华北",g:"中等",s:"待核实",w:"待核实",rank:"C-",majors:"比较文学与世界文学",exam:"待核实",enroll:"待核实",comp:"低",note:"外语院校；比较文学",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10068",wx:"http://wxy.tjfsu.edu.cn/"},
+{n:"贵州民族大学",t:"双非",c:"贵阳",r:"西南",g:"水区",s:"待核实",w:"待核实",rank:"C-",majors:"文艺学",exam:"待核实",enroll:"待核实",comp:"低",note:"民族文学",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10672",wx:"http://wxy.gzmu.edu.cn/"},
+{n:"云南民族大学",t:"双非",c:"昆明",r:"西南",g:"中等",s:"待核实",w:"待核实",rank:"C-",majors:"文艺学",exam:"待核实",enroll:"待核实",comp:"低",note:"民族文学特色",protect:"是",reject:"低",prof:"待核实",yz:"https://yz.chsi.com.cn/school/stu/10691",wx:"http://wxy.ynni.edu.cn/"}
+];
+var DB_COUNT = DB.length;
+
+// ═══════════ 常量 ═══════════
+var TIERS = ["985","211","双一流","双非"];
+var REGIONS = ["华东","华北","华南","华中","西南","西北","东北"];
+var MAJORS = ["文艺学","中国古典文献学","中国古代文学","中国现当代文学","比较文学与世界文学","中国语言文学（大类）"];
+// 简称映射：用户选旧名称或DB用简称时双向兼容
+var MAJOR_ALIAS = {"古代文学":"中国古代文学","现当代文学":"中国现当代文学","比较文学":"比较文学与世界文学","文献学":"中国古典文献学"};
+var rankOrder = ["A+","A","A-","B+","B","B-","C+","C","C-"];
+var STORAGE_KEY = 'ky-xs-v4';
+var currentSort = 'score';
+var compareSet = [];
+var currentResults = [];
+
+// ═══════════ localStorage ═══════════
+function saveState() {
+  var s = {
+    'self-bg': $('self-bg').value,
+    'self-eng': $('self-eng').value,
+    'self-qtype': $('self-qtype').value,
+    'self-fear': $('self-fear').value,
+    'self-risk': $('self-risk').value,
+    'self-time': $('self-time').value,
+    'filter-grading': $('filter-grading').value,
+    'filter-scope': $('filter-scope').value,
+    'filter-writing': $('filter-writing').value,
+    'filter-protect': $('filter-protect').value,
+    'filter-strategy': $('filter-strategy').value,
+    'filter-rank': $('filter-rank').value,
+    'filter-search': $('filter-search').value,
+    'self-majors': chipVals('self-majors'),
+    'self-regions': chipVals('self-regions'),
+    'filter-tier': chipVals('filter-tier'),
+    'filter-region': chipVals('filter-region'),
+    sort: currentSort, dark: document.body.classList.contains('dark'),
+    quizScores: quizScores, quizDone: quizAnswered >= QUIZ_QUESTIONS.length,
+    favs: favSet, favFilter: favFilterOn,
+    compares: compareSet
+  };
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch(e) {}
+}
+
+function loadState() {
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    var s = JSON.parse(raw);
+    ['self-bg','self-eng','self-qtype','self-fear','self-risk','self-time','filter-grading','filter-scope','filter-writing','filter-protect','filter-strategy','filter-rank'].forEach(function(id) {
+      if (s[id]) $(id).value = s[id];
+    });
+    if (s['filter-search']) $('filter-search').value = s['filter-search'];
+    if (s['self-majors']) setChips('self-majors', s['self-majors']);
+    if (s['self-regions']) setChips('self-regions', s['self-regions']);
+    if (s['filter-tier']) setChips('filter-tier', s['filter-tier']);
+    if (s['filter-region']) setChips('filter-region', s['filter-region']);
+    if (s.sort) currentSort = s.sort;
+    if (s.dark) document.body.classList.add('dark');
+    if (s.compares) compareSet = s.compares;
+    if (s.favs) { favSet = s.favs; renderTargets(); }
+    if (s.favFilter) { favFilterOn = true; $('fav-filter-btn').classList.add('active'); $('fav-filter-btn').textContent = '⭐ 已收藏 (' + (s.favs?s.favs.length:0) + ')'; }
+    if (s.quizScores) { quizScores = s.quizScores; }
+    if (s.quizDone) { quizAnswered = QUIZ_QUESTIONS.length; setTimeout(function(){ showQuizResult(); }, 100); }
+    updateThemeIcon(); updateSortBtns();
+  } catch(e) {}
+}
+
+// ═══════════ helpers ═══════════
+function $(id) { return document.getElementById(id); }
+function chipVals(id) {
+  var cbs = document.querySelectorAll('#'+id+' input[type=checkbox]:checked');
+  var arr = []; for (var i=0; i<cbs.length; i++) arr.push(cbs[i].value);
+  return arr;
+}
+function setChips(id, vals) {
+  document.querySelectorAll('#'+id+' .chip').forEach(function(ch) {
+    var cb = ch.querySelector('input'); if (!cb) return;
+    cb.checked = vals.indexOf(cb.value) >= 0;
+    ch.classList.toggle('active', cb.checked);
+  });
+}
+
+function clearAll() { localStorage.removeItem(STORAGE_KEY); resetSelf(); resetFilters(); compareSet=[]; favSet=[]; favFilterOn=false; currentSort='score'; updateSortBtns(); updateCmpBar(); renderTargets(); document.body.classList.remove('dark'); updateThemeIcon(); renderQuiz(); goStep(1); }
+
+function toggleTheme() { document.body.classList.toggle('dark'); updateThemeIcon(); saveState(); }
+function updateThemeIcon() { var b=$('theme-btn'); if(b)b.textContent=document.body.classList.contains('dark')?'☀️':'🌙'; }
+(function(){
+  try{var s=JSON.parse(localStorage.getItem(STORAGE_KEY));if(s&&s.dark)document.body.classList.add('dark');else if(window.matchMedia('(prefers-color-scheme:dark)').matches)document.body.classList.add('dark');}catch(e){}
+  updateThemeIcon();
+})();
+
+// ═══════════ chips ═══════════
+function renderChips(id, opts, sel) {
+  sel = sel || [];
+  var el = $(id); if(!el)return;
+  var h='';
+  for(var i=0;i<opts.length;i++){
+    var o=opts[i], isSel=sel.indexOf(o)>=0;
+    h+='<label class="chip'+(isSel?' active':'')+'"><input type="checkbox" value="'+o+'" '+(isSel?'checked':'')+' onchange="this.parentElement.classList.toggle(\'active\',this.checked);onChange();">'+o+'</label>';
+  }
+  el.innerHTML = h;
+}
+
+// ═══════════ 事件 ═══════════
+function onChange() {
+  saveState();
+  if($('sec-2').classList.contains('visible')) updateLive();
+  if($('sec-3').classList.contains('visible')) refresh();
+}
+
+function updateLive() {
+  var self = getSelf(), count = doFilter(self).length;
+  $('live-num').textContent = count;
+  $('live-count').style.display = 'inline-flex';
+}
+
+// ═══════════ 步骤 ═══════════
+function goStep(n) {
+  document.querySelectorAll('.section').forEach(function(s){s.classList.remove('visible');});
+  $('sec-'+n).classList.add('visible');
+  document.querySelectorAll('.step').forEach(function(s,i){
+    s.classList.remove('active','done');
+    if(i+1===n) s.classList.add('active');
+    else if(i+1<n) s.classList.add('done');
+  });
+  document.querySelectorAll('.step.done .num').forEach(function(el){el.textContent='✓';});
+  document.querySelectorAll('.step:not(.done) .num').forEach(function(el){el.textContent=parseInt(el.parentElement.dataset.step);});
+  if(n===3) refresh();
+  if(n===2) { applyRegions(); updateLive(); }
+  scrollTo(0,0); saveState();
+}
+
+function applyRegions() {
+  var regs = chipVals('self-regions');
+  if(regs.length>0) setChips('filter-region', regs);
+  saveState();
+}
+
+function resetSelf() {
+  ['self-bg','self-eng','self-qtype','self-fear','self-risk','self-time'].forEach(function(id){$(id).value='';});
+  document.querySelectorAll('#self-majors input,#self-regions input').forEach(function(cb){cb.checked=false;cb.parentElement.classList.remove('active');});
+  saveState();
+}
+function resetFilters() {
+  document.querySelectorAll('#filter-tier input,#filter-region input').forEach(function(cb){cb.checked=false;cb.parentElement.classList.remove('active');});
+  ['filter-grading','filter-scope','filter-writing','filter-protect','filter-strategy','filter-rank'].forEach(function(id){$(id).value='';});
+  $('filter-search').value='';
+  if (favFilterOn) { favFilterOn = false; $('fav-filter-btn').classList.remove('active'); $('fav-filter-btn').textContent = '⭐ 只看已收藏'; }
+  saveState(); updateLive();
+}
+
+// ═══════════ 评分 ═══════════
+function getVerify(s) {
+  // 🟢 官网确认：所有关键字段都无"待核实"和"≈推断"
+  var hasUnknown = (s.s==='待核实' || s.w==='待核实' || s.exam==='待核实' || s.enroll==='待核实' || s.protect==='待核实' || s.reject==='待核实');
+  var hasInferred = (s.note && s.note.indexOf('≈推断') >= 0);
+  if (!hasUnknown && !hasInferred) return 'official';
+  if (hasInferred && !hasUnknown) return 'inferred';
+  if (hasUnknown) return 'unknown';
+  return 'inferred';
+}
+var VERIFY_LABELS = { official:'🟢 官网确认', inferred:'🟡 经验推断', unknown:'⚪ 待核实' };
+var VERIFY_CLASS = { official:'v-official', inferred:'v-inferred', unknown:'v-unknown' };
+
+// ═══════════ 冲稳保 ═══════════
+function getStrategy(school, self) {
+  var bgTier = {'985':5, '211':4, '双非一本':3, '二本':2, '专升本':1}[self.bg] || 0;
+  var sTier = {'985':5, '211':4, '双一流':3, '双非':2}[school.t] || 2;
+  var gap = sTier - bgTier;
+  var sc = calcScore(school, self);
+  var comp = school.comp;
+  // 冲：层次跨越2级以上、或高竞争+低匹配分、或层次跨1级+很低匹配分
+  if (gap >= 2) return '冲';
+  if ((comp === '极高' || comp === '高→极高') && sc < 55) return '冲';
+  if (gap === 1 && sc < 40) return '冲';
+  if (comp === '极高' && sc < 65) return '冲';
+  // 保：层次低于本科+高匹配分、或低竞争+高匹配分
+  if (gap <= -1 && sc >= 60) return '保';
+  if (gap <= 0 && (comp === '低' || comp === '中低') && sc >= 65) return '保';
+  if (comp === '低' && sc >= 70) return '保';
+  // 稳：其余
+  return '稳';
+}
+var STRATEGY_LABELS = { '冲':'🔴 冲刺', '稳':'🟡 稳妥', '保':'🟢 保底' };
+var STRATEGY_CLASS = { '冲':'s-chong', '稳':'s-wen', '保':'s-bao' };
+function calcScore(school, self) {
+  var total = 0;
+  var bgR = {'985':5,'211':4,'双非一本':3,'二本':2,'专升本':1}[self.bg]||0;
+  var tR = {'985':5,'211':4,'双一流':3,'双非':2}[school.t]||2;
+  var gap = tR - bgR;
+  total += gap <= 0 ? 30 : gap === 1 ? 22 : gap === 2 ? 14 : gap === 3 ? 7 : 3;
+  var engR = {'强':5,'中':3,'弱':2,'很弱':1}[self.eng]||0;
+  if(engR>=5) total += school.g==='旱区'?15:(school.g==='水区'?20:18);
+  else if(engR>=3) total += school.g==='旱区'?10:(school.g==='水区'?18:15);
+  else if(engR>=2) total += school.g==='旱区'?5:(school.g==='水区'?12:8);
+  else total += school.g==='旱区'?0:(school.g==='水区'?8:5);
+  if(school.g==='待核实') total += 8;
+  var ss = 20;
+  if(self.fear==='怕语言学' && school.s.indexOf('大综合')>=0) ss=5;
+  else if(self.fear==='怕大综合' && school.s.indexOf('大综合')>=0) ss=5;
+  else if(self.fear==='怕作文' && school.w==='有') ss=5;
+  else if(!self.fear||self.fear==='都不怕') ss=20; else ss=15;
+  total += ss;
+  var qs = 10;
+  if(self.qtype==='背诵' && (school.s.indexOf('小综合')>=0||school.s==='待核实')) qs=15;
+  else if(self.qtype==='写作' && school.w==='有') qs=15;
+  else if(self.qtype==='论述') qs=13;
+  if(self.qtype==='写作' && school.w!=='有' && school.w!=='待核实') qs=5;
+  total += qs;
+  var ts = 10;
+  if(self.time==='全职') ts=15;
+  else if(self.time==='半职') ts=school.s.indexOf('大综合')>=0?10:13;
+  else if(self.time==='在职') ts=school.s.indexOf('大综合')>=0?4:8;
+  total += ts;
+  var score = Math.round(total);
+  if(self.risk==='冲名校' && (school.t==='985'||school.t==='211')) score = Math.min(100, score+8);
+  if(self.risk==='上岸就行' && (school.t==='985'||school.t==='211')) score = Math.max(0, score-5);
+  if(self.risk==='上岸就行' && school.t==='双非') score = Math.min(100, score+5);
+  return score;
+}
+
+// ═══════════ 过滤 ═══════════
+function getSelf() {
+  return {
+    bg: $('self-bg').value, eng: $('self-eng').value,
+    majors: chipVals('self-majors'), qtype: $('self-qtype').value,
+    fear: $('self-fear').value, risk: $('self-risk').value,
+    time: $('self-time').value
+  };
+}
+
+function doFilter(self) {
+  var fTiers = chipVals('filter-tier'), fRegions = chipVals('filter-region');
+  var fG = $('filter-grading').value, fS = $('filter-scope').value;
+  var fW = $('filter-writing').value, fP = $('filter-protect').value;
+  var fSt = $('filter-strategy').value, fRk = $('filter-rank').value;
+  var fQ = $('filter-search').value.trim().toLowerCase();
+  var rkTh = fRk ? rankOrder.indexOf(fRk) : -1;
+  return DB.filter(function(s){
+    if(fTiers.length>0 && fTiers.indexOf(s.t)<0) return false;
+    if(fRegions.length>0 && fRegions.indexOf(s.r)<0) return false;
+    if(fG && s.g!==fG) return false;
+    if(fS && s.s!=='待核实' && s.s.indexOf(fS)<0) return false;
+    if(fW==='有' && s.w!=='有' && s.w!=='待核实') return false;
+    if(fW==='无' && s.w==='有') return false;
+    if(fP && s.protect && s.protect!=='待核实' && s.protect!==fP) return false;
+    if(fSt && getStrategy(s, self)!==fSt) return false;
+    if(favFilterOn && favSet.indexOf(s.n)<0) return false;
+    if(rkTh>=0 && rankOrder.indexOf(s.rank) > rkTh) return false;
+    if(self.majors.length>0 && s.majors!=='待核实'){
+      var sm = s.majors.split(',');
+      var ok = false;
+      for(var i=0;i<sm.length;i++){
+        var major = sm[i].trim();
+        // 解析DB中的简称
+        var resolved = MAJOR_ALIAS[major] || major;
+        for(var j=0;j<self.majors.length;j++){
+          var um = self.majors[j];
+          var umResolved = MAJOR_ALIAS[um] || um;
+          if(resolved===umResolved || major===um || major.indexOf(um)>=0 || um.indexOf(major)>=0 || um==='中国语言文学（大类）'){ok=true;break;}
+        }
+        if(ok) break;
+      }
+      if(!ok) return false;
+    }
+    if(fQ && s.n.toLowerCase().indexOf(fQ)<0 && s.c.toLowerCase().indexOf(fQ)<0 && s.note.toLowerCase().indexOf(fQ)<0 && s.r.toLowerCase().indexOf(fQ)<0 && (s.prof||'').toLowerCase().indexOf(fQ)<0) return false;
+    return true;
+  });
+}
+
+// ═══════════ 排序 ═══════════
+function updateSortBtns() {
+  document.querySelectorAll('.sort-btn').forEach(function(b){b.classList.toggle('active',b.dataset.sort===currentSort);});
+}
+$('sort-group').addEventListener('click',function(e){
+  var b=e.target.closest('.sort-btn'); if(!b)return;
+  currentSort=b.dataset.sort; updateSortBtns(); saveState(); renderCards(currentResults);
+});
+
+function sortSchools(arr) {
+  var gOrd={'水区':3,'中等':2,'旱区':1}, tOrd={'985':4,'211':3,'双一流':2,'双非':1};
+  if(currentSort==='rank') return arr.slice().sort(function(a,b){return rankOrder.indexOf(a.rank)-rankOrder.indexOf(b.rank);});
+  if(currentSort==='tier') return arr.slice().sort(function(a,b){return (tOrd[b.t]||0)-(tOrd[a.t]||0) || rankOrder.indexOf(a.rank)-rankOrder.indexOf(b.rank);});
+  if(currentSort==='grading') return arr.slice().sort(function(a,b){return (gOrd[b.g]||0)-(gOrd[a.g]||0) || b.score-a.score;});
+  return arr.slice().sort(function(a,b){return b.score-a.score;});
+}
+
+// ═══════════ 收藏夹 ═══════════
+var favSet = [];
+var favFilterOn = false;
+
+function toggleFav(name) {
+  var i = favSet.indexOf(name);
+  if (i >= 0) { favSet.splice(i, 1); }
+  else { favSet.push(name); }
+  updateFavs(); saveState();
+}
+
+function updateFavs() {
+  // 更新卡片上的星星
+  document.querySelectorAll('.fav-star').forEach(function(el) {
+    var card = el.closest('.school-card');
+    if (!card) return;
+    var nameEl = card.querySelector('.sname');
+    if (!nameEl) return;
+    var name = nameEl.textContent;
+    var isFav = favSet.indexOf(name) >= 0;
+    el.textContent = isFav ? '⭐' : '☆';
+    if (isFav) el.classList.add('on'); else el.classList.remove('on');
+  });
+  // 更新首页目标面板
+  renderTargets();
+  // 如果收藏筛选开启，刷新结果
+  if (favFilterOn && $('sec-3').classList.contains('visible')) refresh();
+}
+
+function renderTargets() {
+  var panel = $('target-panel');
+  var grid = $('target-grid');
+  if (favSet.length === 0) {
+    panel.classList.remove('show');
+    return;
+  }
+  panel.classList.add('show');
+  var self = getSelf();
+  var schools = [];
+  for (var i = 0; i < favSet.length; i++) {
+    var s = DB.filter(function(x) { return x.n === favSet[i]; })[0];
+    if (s) {
+      s.score = calcScore(s, self);
+      s.strategy = getStrategy(s, self);
+      schools.push(s);
+    }
+  }
+  // 按梯度排：冲→稳→保
+  var ord = { '冲': 0, '稳': 1, '保': 2 };
+  schools.sort(function(a, b) { return (ord[a.strategy] || 1) - (ord[b.strategy] || 1); });
+  grid.innerHTML = schools.map(function(s) {
+    var sc = s.strategy;
+    var scCls = sc === '冲' ? 's-chong' : sc === '稳' ? 's-wen' : 's-bao';
+    return '<div class="t-item" onclick="goStep(3);setTimeout(function(){document.querySelector(\'.sname\').scrollIntoView({behavior:\'smooth\'});},300);">' +
+      '<span class="strategy-badge ' + scCls + '" style="font-size:10px;padding:2px 8px;">' + (sc==='冲'?'🔴':sc==='稳'?'🟡':'🟢') + ' ' + sc + '</span>' +
+      '<span class="t-name">' + s.n + '</span>' +
+      '<span class="t-score" style="color:' + (s.score >= 70 ? 'var(--green)' : s.score >= 45 ? '#e67e22' : 'var(--red)') + ';">' + s.score + '分</span>' +
+      '<span class="t-remove" onclick="event.stopPropagation();toggleFav(\'' + s.n.replace(/'/g, "\\'") + '\')" title="移除">✕</span>' +
+      '</div>';
+  }).join('');
+}
+
+function toggleFavFilter() {
+  favFilterOn = !favFilterOn;
+  var btn = $('fav-filter-btn');
+  if (favFilterOn) {
+    btn.classList.add('active');
+    btn.textContent = '⭐ 已收藏 (' + favSet.length + ')';
+  } else {
+    btn.classList.remove('active');
+    btn.textContent = '⭐ 只看已收藏';
+  }
+  refresh();
+}
+
+// ═══════════ 对比 ═══════════
+function toggleCmp(name, checked) {
+  if(checked){if(compareSet.length>=3){alert('最多对比3所');return false;}compareSet.push(name);}
+  else{var i=compareSet.indexOf(name); if(i>=0)compareSet.splice(i,1);}
+  updateCmpBar(); saveState(); return true;
+}
+function updateCmpBar() {
+  var bar=$('cmp-bar'), info=$('cmp-info');
+  if(compareSet.length===0){bar.classList.remove('show');info.textContent='已选 0/3';}
+  else{bar.classList.add('show');info.innerHTML='已选 <strong>'+compareSet.length+'</strong>/3：'+compareSet.join('、');}
+  document.querySelectorAll('.cmp-check input').forEach(function(cb){cb.checked=compareSet.indexOf(cb.value)>=0;});
+}
+function clearCmp(){compareSet=[];updateCmpBar();saveState();}
+function openCmp(){
+  if(compareSet.length<2){alert('请至少选2所');return;}
+  var schools=DB.filter(function(s){return compareSet.indexOf(s.n)>=0;});
+  var self=getSelf();
+  var rows=[{l:'层次',k:'t'},{l:'城市',k:'c'},{l:'地区',k:'r'},{l:'给分',k:'g'},{l:'学科评估',k:'rank'},{l:'考试范围',k:'s'},{l:'作文',k:'w'},{l:'科目',k:'exam'},{l:'招生',k:'enroll'},{l:'竞争',k:'comp'},{l:'保护一志愿',k:'protect'},{l:'复试淘汰',k:'reject'},{l:'匹配分',k:'_s'}];
+  var h='<thead><tr><th>指标</th>';
+  schools.forEach(function(s){h+='<th style="font-weight:700;">'+s.n+'</th>';});
+  h+='</tr></thead><tbody>';
+  rows.forEach(function(r){
+    h+='<tr><td>'+r.l+'</td>';
+    schools.forEach(function(s){
+      var v;
+      if(r.k==='_s'){var sc=calcScore(s,self);v='<span style="font-weight:800;color:'+(sc>=70?'var(--green)':sc>=45?'#e67e22':'var(--red)')+';">'+sc+'分</span>';}
+      else{v=s[r.k]||'-';if(r.k==='g')v=s.g==='旱区'?'🔴旱区':s.g==='水区'?'🟢水区':s.g==='中等'?'🟡中等':'❓';if(r.k==='w')v=s.w==='有'?'✍️有':s.w==='无'?'❌无':'❓';if(r.k==='protect')v=s.protect==='是'?'🛡️是':s.protect==='否'?'⚠️否':'❓';if(r.k==='reject')v=s.reject==='低'?'🟢低':s.reject==='中'?'🟡中':s.reject==='高'?'🔴高':'❓';}
+      h+='<td>'+v+'</td>';
+    });
+    h+='</tr>';
+  });
+  h+='</tbody>';
+  $('cmp-table').innerHTML=h;
+  $('cmp-dlg').classList.add('open'); document.body.style.overflow='hidden';
+}
+function closeCmp(){$('cmp-dlg').classList.remove('open');document.body.style.overflow='';}
+
+// ═══════════ 学校详情 ═══════════
+function showDetail(name) {
+  var s=DB.filter(function(x){return x.n===name;})[0]; if(!s)return;
+  var self=getSelf(), sc=calcScore(s,self);
+  $('detail-title').textContent=s.n;
+  $('detail-body').innerHTML=
+    '<div class="ds"><h4>基本信息</h4><p>层次：<strong>'+s.t+'</strong> · 城市：'+s.c+' · 地区：'+s.r+' · 评估：<strong>'+s.rank+'</strong><br>数据可信度：<span class="verify-badge '+(VERIFY_CLASS[getVerify(s)]||'')+'">'+(VERIFY_LABELS[getVerify(s)]||'')+'</span></p></div>'+
+    '<div class="ds"><h4>考试</h4><p>范围：'+s.s+' | 作文：'+s.w+'<br>科目：'+s.exam+'<br>招生：'+s.enroll+' | 竞争：'+s.comp+'</p></div>'+
+    '<div class="ds"><h4>录取风格</h4><p>一志愿保护：'+(s.protect||'?')+' | 复试淘汰：'+(s.reject||'?')+'</p></div>'+
+    '<div class="ds"><h4>匹配评分</h4><p style="font-size:20px;font-weight:800;color:'+(sc>=70?'var(--green)':sc>=45?'#e67e22':'var(--red)')+';">'+sc+' / 100</p></div>'+
+    '<div class="ds"><h4>教授 / 方向</h4><p>'+(s.prof&&s.prof!=='待核实'?s.prof:'暂无')+'</p></div>'+
+    '<div class="ds"><h4>备注</h4><p>'+s.note+'</p></div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;"><a href="'+s.yz+'" target="_blank" style="color:var(--accent);">📋 研招网</a> <a href="'+s.wx+'" target="_blank" style="color:var(--accent);">🏫 文学院官网</a></div>';
+  $('detail-dlg').classList.add('open'); document.body.style.overflow='hidden';
+}
+function closeDetail(){$('detail-dlg').classList.remove('open');document.body.style.overflow='';}
+
+// ═══════════ 纠错反馈 ═══════════
+function sendFeedback(name) {
+  var s = DB.filter(function(x){return x.n===name;})[0];
+  if (!s) return;
+  var info = '学校：'+s.n+'\n层次：'+s.t+' | 城市：'+s.c+' | 评估：'+s.rank+'\n考试范围：'+s.s+' | 作文：'+s.w+'\n科目：'+s.exam+'\n招生：'+s.enroll+' | 竞争：'+s.comp+'\n一志愿保护：'+(s.protect||'?')+' | 复试淘汰：'+(s.reject||'?')+'\n教授：'+(s.prof||'?')+'\n可信度：'+(VERIFY_LABELS[getVerify(s)]||'?')+'\n\n请在此补充/纠错：\n';
+  var mailto = 'mailto:?subject=[择校数据纠错] '+encodeURIComponent(s.n)+'&body='+encodeURIComponent(info);
+  // 同时复制到剪贴板
+  navigator.clipboard.writeText(info).then(function(){
+    alert('学校信息已复制到剪贴板！\n请粘贴到邮件/微信中，补充你的纠错内容后发送。\n\n如邮箱客户端未打开，也可以手动粘贴。');
+  }).catch(function(){
+    window.open(mailto, '_blank');
+  });
+}
+
+// ═══════════ 核心 ═══════════
+function refresh() {
+  var self = getSelf();
+  var schools = doFilter(self);
+  for(var i=0;i<schools.length;i++){
+    schools[i].score = calcScore(schools[i], self);
+    schools[i].strategy = getStrategy(schools[i], self);
+  }
+  schools = sortSchools(schools);
+  currentResults = schools;
+
+  var bgR={'985':5,'211':4,'双非一本':3,'二本':2,'专升本':1}[self.bg]||0;
+  var engR={'强':4,'中':3,'弱':2,'很弱':1}[self.eng]||0;
+  var bar=$('assessment-bar');
+  bar.style.display = (self.bg||self.eng||self.risk||self.time||self.qtype||self.fear) ? 'flex':'none';
+  bar.innerHTML = [
+    self.bg&&'<span class="tag '+(bgR>=3?'good':'warn')+'">本科：'+self.bg+'</span>',
+    self.eng&&'<span class="tag '+(engR>=3?'good':'warn')+'">英语：'+self.eng+'</span>',
+    self.risk&&'<span class="tag '+(self.risk==='上岸就行'?'good':'warn')+'">'+(self.risk==='冲名校'?'🔥':self.risk==='稳211'?'⚖️':'🛟')+' '+self.risk+'</span>',
+    self.time&&'<span class="tag '+(self.time==='在职'?'risk':'good')+'">'+self.time+'</span>',
+    self.qtype&&self.qtype!=='说不上来'&&'<span class="tag good">擅长：'+self.qtype+'</span>',
+    self.fear&&self.fear!=='都不怕'&&'<span class="tag risk">怕：'+self.fear+'</span>'
+  ].filter(Boolean).join('');
+
+  var unv = false;
+  for(var j=0;j<schools.length;j++){if(schools[j].s==='待核实'||schools[j].w==='待核实'||schools[j].exam==='待核实'){unv=true;break;}}
+  $('data-note').style.display = unv ? 'block' : 'none';
+  // 可信度概览
+  var off=0, inf=0, unk=0;
+  for(var k=0;k<schools.length;k++){ var v=getVerify(schools[k]); if(v==='official')off++; else if(v==='inferred')inf++; else unk++; }
+  var cb=$('cred-bar');
+  cb.style.display='flex';
+  cb.innerHTML='<span style="font-weight:700;">📊 数据可信度：</span>'+
+    '<span class="c-item"><span class="verify-badge v-official">🟢 官网确认</span> '+off+'所</span>'+
+    '<span class="c-item"><span class="verify-badge v-inferred">🟡 经验推断</span> '+inf+'所</span>'+
+    '<span class="c-item"><span class="verify-badge v-unknown">⚪ 待核实</span> '+unk+'所</span>'+
+    '<span style="font-size:10px;color:var(--muted);margin-left:auto;">点击学校名看详情 · 点「📝纠错/补充」帮助我们改进</span>';
+
+  // 冲稳保概览
+  var ch=0, w=0, b=0;
+  for(var k2=0;k2<schools.length;k2++){ var st=schools[k2].strategy; if(st==='冲')ch++; else if(st==='稳')w++; else b++; }
+  var sb=$('strategy-bar');
+  sb.style.display='flex';
+  sb.innerHTML='<span style="font-weight:700;">🎯 梯度建议：</span>'+
+    '<span class="st-item"><span class="strategy-badge s-chong">🔴 冲刺</span> '+ch+'所</span>'+
+    '<span class="st-item"><span class="strategy-badge s-wen">🟡 稳妥</span> '+w+'所</span>'+
+    '<span class="st-item"><span class="strategy-badge s-bao">🟢 保底</span> '+b+'所</span>'+
+    '<span style="font-size:10px;color:var(--muted);margin-left:auto;">基于你的背景+匹配分+竞争程度自动计算</span>';
+
+  $('results-count').innerHTML = '共 <strong>'+schools.length+'</strong> 所匹配';
+  $('hero-count').textContent = schools.length;
+  renderCards(schools);
+}
+
+function renderCards(schools) {
+  var grid=$('card-grid');
+  if(schools.length===0){
+    // 分析哪些条件可能太严
+    var hints = [];
+    if (chipVals('filter-tier').length > 0) hints.push('试试勾选更多「学校层次」');
+    if (chipVals('filter-region').length === 1) hints.push('「所在地区」只选了1个，可以多加几个');
+    if ($('filter-grading').value) hints.push('「给分区」筛选可以改为不限');
+    if ($('filter-scope').value) hints.push('「考试范围」筛选可以改为不限');
+    if ($('filter-rank').value && $('filter-rank').value.indexOf('A')>=0) hints.push('「学科评估」等级可以放低到B+或B');
+    if ($('filter-protect').value) hints.push('「保护一志愿」筛选可以改为不限');
+    if ($('filter-strategy').value) hints.push('「冲稳保梯度」筛选可以改为不限');
+    if ($('filter-search').value.trim()) hints.push('「关键词搜索」可能筛掉了太多学校');
+    var hintText = hints.length > 0 ? '<p style="font-size:12px;margin-top:8px;">💡 ' + hints.slice(0,3).join('；') + '</p>' : '';
+    grid.innerHTML='<div class="empty-state"><div class="big">🔍</div><p>没有匹配的学校</p>'+hintText+'<button class="btn btn-ghost" onclick="goStep(2)">放宽筛选条件</button></div>';
+    return;
+  }
+  var h='';
+  var tc={'985':'t985','211':'t211','双一流':'tsyl','双非':'tsf'};
+  for(var i=0;i<schools.length;i++){
+    var s=schools[i];
+    var sc=s.score, color=sc>=70?'var(--score-high)':sc>=45?'var(--score-mid)':'var(--score-low)';
+    var label=sc>=70?'高匹配':sc>=45?'中等匹配':'低匹配';
+    var best=sc>=75?' best':'';
+    var chk=compareSet.indexOf(s.n)>=0?'checked':'';
+    var isFav=favSet.indexOf(s.n)>=0;
+    var sn=s.n.replace(/'/g,"\\'");
+    h+='<div class="school-card'+best+'">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:6px;">'+
+        '<div style="flex:1;min-width:180px;">'+
+          '<span class="sname" onclick="showDetail(\''+sn+'\')">'+s.n+'</span>'+
+          '<span class="tier-badge '+(tc[s.t]||'tsf')+'" style="margin-left:6px;">'+s.t+'</span>'+
+          '<span class="tag rank" style="margin-left:4px;">'+s.rank+'</span>'+
+          '<span class="strategy-badge '+ (STRATEGY_CLASS[s.strategy]||'') +'">'+ (STRATEGY_LABELS[s.strategy]||'') +'</span>'+
+          '<span class="verify-badge '+ (VERIFY_CLASS[getVerify(s)]||'') +'">'+ (VERIFY_LABELS[getVerify(s)]||'') +'</span>'+
+          (s.protect==='否'?'<span class="tag" style="background:#f8d7da;color:#721c24;margin-left:3px;">⚠️不保护一志愿</span>':'')+
+        '</div>'+
+        '<div style="display:flex;align-items:center;gap:8px;">'+
+          '<div style="text-align:right;">'+
+            '<div class="score-bar-wrap">'+
+              '<span class="score-num" style="color:'+color+';">'+sc+'</span>'+
+              '<div class="score-bar"><div class="fill" style="width:'+sc+'%;background:'+color+';"></div></div>'+
+              '<span style="font-size:10px;color:'+color+';">'+label+'</span>'+
+            '</div>'+
+          '</div>'+
+          '<span class="fav-star'+(isFav?' on':'')+'" onclick="event.stopPropagation();toggleFav(\''+sn+'\')" title="收藏到目标清单">'+(isFav?'⭐':'☆')+'</span>'+
+          '<label class="cmp-check" onclick="event.stopPropagation()">'+
+            '<input type="checkbox" value="'+s.n+'" '+chk+' onchange="if(!toggleCmp(\''+sn+'\',this.checked)){this.checked=false;}">'+
+            '<span class="box">✓</span> 对比'+
+          '</label>'+
+        '</div>'+
+      '</div>'+
+      '<details><summary style="cursor:pointer;font-size:12px;color:var(--muted);">展开详情 ▼</summary><div style="margin-top:10px;">'+
+        '<div class="tags">'+
+          '<span class="tag">📍 '+s.c+' · '+s.r+'</span>'+
+          '<span class="tag">'+s.s+'</span>'+
+          '<span class="tag '+(s.g==='旱区'?'dry':s.g==='水区'?'wet':'')+'">'+(s.g==='旱区'?'🔴':s.g==='水区'?'🟢':'🟡')+' '+s.g+'</span>'+
+          (s.w==='有'?'<span class="tag writing">✍️ 考作文</span>':'')+
+          (s.s==='待核实'?'<span class="tag" style="background:#fff3cd;">⚠️ 待核实</span>':'')+
+          (s.protect==='是'?'<span class="tag" style="background:#d4edda;color:#155724;">🛡️ 保护一志愿</span>':'')+
+        '</div>'+
+        '<div class="detail">'+
+          '<div>📋 <strong>考试：</strong>'+s.exam+'</div>'+
+          '<div>👥 <strong>招生：</strong>'+s.enroll+'　🏃 <strong>竞争：</strong>'+s.comp+'</div>'+
+          '<div>🗑️ <strong>复试淘汰：</strong>'+(s.reject==='低'?'🟢<20%':s.reject==='中'?'🟡20-40%':s.reject==='高'?'🔴>40%':'❓')+'</div>'+
+          '<div>👨‍🏫 <strong>教授：</strong>'+(s.prof&&s.prof!=='待核实'?s.prof:'待核实')+'</div>'+
+          '<div>💡 '+s.note+'</div>'+
+        '</div>'+
+        '<div class="links">'+
+          '<a href="'+s.yz+'" target="_blank" rel="noopener">📋 研招网</a>'+
+          '<a href="'+s.wx+'" target="_blank" rel="noopener">🏫 文学院官网</a>'+
+          '<span class="feedback-link" onclick="event.stopPropagation();sendFeedback(\''+sn+'\')">📝 纠错/补充</span>'+
+        '</div>'+
+      '</div></details>'+
+    '</div>';
+  }
+  grid.innerHTML = h;
+  updateCmpBar();
+}
+
+// ═══════════ CSV ═══════════
+function exportCSV() {
+  var self=getSelf(), schools=doFilter(self);
+  for(var i=0;i<schools.length;i++){
+    schools[i].score=calcScore(schools[i],self);
+    schools[i].strategy=getStrategy(schools[i],self);
+  }
+  schools.sort(function(a,b){return b.score-a.score;});
+  var hdr='学校,层次,城市,地区,给分,评估,考试范围,作文,科目,招生,竞争,匹配分,冲稳保,一志愿保护,复试淘汰,数据可信度,备注';
+  var rows=schools.map(function(s){return '"'+s.n+'","'+s.t+'","'+s.c+'","'+s.r+'","'+s.g+'","'+s.rank+'","'+s.s+'","'+s.w+'","'+s.exam+'","'+s.enroll+'","'+s.comp+'","'+s.score+'","'+(STRATEGY_LABELS[s.strategy]||'')+'","'+(s.protect||'')+'","'+(s.reject||'')+'","'+VERIFY_LABELS[getVerify(s)]+'","'+s.note+'"';});
+  var csv='﻿'+hdr+'\n'+rows.join('\n');
+  var b=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='考研择校.csv'; a.click();
+}
+
+// ═══════════ 分享 ═══════════
+function copyLink() {
+  var self=getSelf(), parts=[];
+  if(self.bg) parts.push('bg='+encodeURIComponent(self.bg));
+  if(self.eng) parts.push('eng='+encodeURIComponent(self.eng));
+  var mj=chipVals('self-majors'); if(mj.length) parts.push('mj='+mj.map(encodeURIComponent).join(','));
+  if(self.qtype) parts.push('qt='+encodeURIComponent(self.qtype));
+  if(self.fear) parts.push('fr='+encodeURIComponent(self.fear));
+  if(self.risk) parts.push('rk='+encodeURIComponent(self.risk));
+  if(self.time) parts.push('tm='+encodeURIComponent(self.time));
+  var ft=chipVals('filter-tier'); if(ft.length) parts.push('ft='+ft.map(encodeURIComponent).join(','));
+  var frg=chipVals('filter-region'); if(frg.length) parts.push('frg='+frg.map(encodeURIComponent).join(','));
+  ['filter-grading','filter-scope','filter-writing','filter-protect','filter-strategy','filter-rank'].forEach(function(id){
+    var v=$(id).value; if(v) parts.push(id.replace('filter-','f')+'='+encodeURIComponent(v));
+  });
+  var q=$('filter-search').value.trim(); if(q) parts.push('q='+encodeURIComponent(q));
+  var url=location.origin+location.pathname+'#'+parts.join('&');
+  var btn=$('share-btn');
+  navigator.clipboard.writeText(url).then(function(){
+    var o=btn.textContent; btn.textContent='✅ 已复制!'; btn.style.background='var(--green)'; btn.style.color='#fff';
+    setTimeout(function(){btn.textContent=o;btn.style.background='';btn.style.color='';},1500);
+  }).catch(function(){alert('请手动复制：\n'+url);});
+}
+
+// ═══════════ 回到顶部 ═══════════
+window.addEventListener('scroll',function(){
+  $('back-top').classList.toggle('show',window.scrollY>400);
+},{passive:true});
+
+// ═══════════ 方向适配测试 ═══════════
+var QUIZ_QUESTIONS = [
+  {
+    q: '1. 你最喜欢读哪类文本？',
+    opts: [
+      { t: '理论著作（哲学、文论、美学）', s: { '文艺学': 2, '比较文学与世界文学': 1 } },
+      { t: '诗词歌赋、古典小说', s: { '中国古代文学': 2, '中国古典文献学': 1 } },
+      { t: '现代小说、新诗、当代作品', s: { '中国现当代文学': 2 } },
+      { t: '外国小说、翻译文学', s: { '比较文学与世界文学': 2 } },
+      { t: '古籍善本、版本目录', s: { '中国古典文献学': 2, '中国古代文学': 1 } }
+    ]
+  },
+  {
+    q: '2. 面对一个文本，你的第一反应是？',
+    opts: [
+      { t: '追问"为什么"——理论框架和逻辑', s: { '文艺学': 2 } },
+      { t: '感受"美不美"——语言、意象、情感', s: { '中国古代文学': 2, '中国现当代文学': 1 } },
+      { t: '关注"写了什么"——社会现实与关怀', s: { '中国现当代文学': 2 } },
+      { t: '比较"有何不同"——中外跨文化视角', s: { '比较文学与世界文学': 2 } },
+      { t: '核查"是什么"——版本、真伪、来源', s: { '中国古典文献学': 2 } }
+    ]
+  },
+  {
+    q: '3. 你最享受的学术活动？',
+    opts: [
+      { t: '写理论文章、做概念辨析', s: { '文艺学': 2 } },
+      { t: '赏析作品、写鉴赏文字', s: { '中国古代文学': 1, '中国现当代文学': 1 } },
+      { t: '阅读外文原著、做翻译', s: { '比较文学与世界文学': 2 } },
+      { t: '整理古籍、校勘注释', s: { '中国古典文献学': 2 } }
+    ]
+  },
+  {
+    q: '4. 你偏好的时间跨度？',
+    opts: [
+      { t: '不分古今，关注问题本身', s: { '文艺学': 2 } },
+      { t: '先秦至清末（古典时代）', s: { '中国古代文学': 2, '中国古典文献学': 1 } },
+      { t: '五四至今（现代中国）', s: { '中国现当代文学': 2 } },
+      { t: '中外兼修，跨越国界', s: { '比较文学与世界文学': 2 } }
+    ]
+  },
+  {
+    q: '5. 你的职业愿景更接近？',
+    opts: [
+      { t: '大学教师/学术研究者', s: { '文艺学': 1, '比较文学与世界文学': 1 } },
+      { t: '中学语文教师', s: { '中国古代文学': 1, '中国现当代文学': 1 } },
+      { t: '出版社编辑/文化行业', s: { '中国现当代文学': 1, '中国古代文学': 1 } },
+      { t: '还没想好 / 都可以', s: {} }
+    ]
+  }
+];
+
+var quizScores = {}; // 累计分数
+var quizAnswered = 0; // 已回答题数
+
+function renderQuiz() {
+  var h = '';
+  // 初始化分数
+  MAJORS.forEach(function(m) { if (m !== '中国语言文学（大类）') quizScores[m] = 0; });
+  for (var i = 0; i < QUIZ_QUESTIONS.length; i++) {
+    var q = QUIZ_QUESTIONS[i];
+    h += '<div class="quiz-q">' + q.q + '</div>';
+    h += '<div class="quiz-opts" data-qi="' + i + '">';
+    for (var j = 0; j < q.opts.length; j++) {
+      h += '<span class="quiz-opt" data-q="' + i + '" data-o="' + j + '" onclick="pickQuiz(this, ' + i + ', ' + j + ')">' + q.opts[j].t + '</span>';
+    }
+    h += '</div>';
+  }
+  $('quiz-questions').innerHTML = h;
+}
+
+function pickQuiz(el, qi, oi) {
+  // 取消之前的选择
+  var row = el.parentElement;
+  var prev = row.querySelector('.quiz-opt.picked');
+  var wasPicked = el.classList.contains('picked');
+
+  // 如果点的是已选中的，取消
+  if (wasPicked) {
+    el.classList.remove('picked');
+    // 减去之前的分数
+    var opt = QUIZ_QUESTIONS[qi].opts[oi];
+    Object.keys(opt.s).forEach(function(k) { quizScores[k] = (quizScores[k] || 0) - opt.s[k]; });
+    quizAnswered--;
+  } else {
+    // 先清除该行所有选中
+    if (prev) {
+      prev.classList.remove('picked');
+      var prevOi = parseInt(prev.dataset.o);
+      var prevOpt = QUIZ_QUESTIONS[qi].opts[prevOi];
+      Object.keys(prevOpt.s).forEach(function(k) { quizScores[k] = (quizScores[k] || 0) - prevOpt.s[k]; });
+      quizAnswered--;
+    }
+    // 选中当前
+    el.classList.add('picked');
+    var opt = QUIZ_QUESTIONS[qi].opts[oi];
+    Object.keys(opt.s).forEach(function(k) { quizScores[k] = (quizScores[k] || 0) + opt.s[k]; });
+    quizAnswered++;
+  }
+
+  // 如果全部答完，显示结果
+  if (quizAnswered >= QUIZ_QUESTIONS.length) {
+    showQuizResult();
+  } else {
+    $('quiz-result').classList.remove('show');
+  }
+}
+
+function showQuizResult() {
+  // 排序
+  var sorted = [];
+  Object.keys(quizScores).forEach(function(k) { sorted.push({ k: k, v: quizScores[k] }); });
+  sorted.sort(function(a, b) { return b.v - a.v; });
+  var top = sorted[0], second = sorted[1];
+  var maxScore = Math.max(1, top.v);
+
+  var h = '<div style="background:var(--accent-bg);padding:12px 16px;border-radius:8px;margin-bottom:10px;">';
+  h += '<span style="font-size:12px;color:var(--muted);">🎯 你可能最适合：</span><br>';
+  h += '<span class="rec" style="color:var(--accent);">' + top.k + '</span>';
+  if (second && second.v >= top.v * 0.6) {
+    h += '<span style="font-size:13px;">　和　</span><span class="rec" style="color:var(--accent);">' + second.k + '</span>';
+  }
+  h += '<br><span style="font-size:10px;color:var(--muted);">已将推荐方向自动勾选，也可手动调整</span>';
+  h += '</div>';
+
+  // 分数条
+  h += '<div style="margin-top:6px;">';
+  sorted.forEach(function(item) {
+    var pct = Math.round((item.v / maxScore) * 100);
+    h += '<div class="quiz-bar-row"><span class="qlbl">' + item.k + '</span><div class="qbar"><div class="qf" style="width:' + pct + '%;"></div></div><span style="font-size:10px;color:var(--muted);">' + item.v + '分</span></div>';
+  });
+  h += '</div>';
+
+  $('quiz-result').innerHTML = h;
+  $('quiz-result').classList.add('show');
+
+  // 自动勾选推荐方向
+  var recSet = [top.k];
+  if (second && second.v >= top.v * 0.6) recSet.push(second.k);
+  setChips('self-majors', recSet);
+  onChange();
+
+  // 滚动到报考方向区域
+  $('self-majors').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// ═══════════ INIT ═══════════
+(function(){
+  renderQuiz();
+  renderChips('self-majors', MAJORS);
+  renderChips('self-regions', REGIONS);
+  renderChips('filter-tier', TIERS);
+  renderChips('filter-region', REGIONS);
+  document.querySelectorAll('.step').forEach(function(s){s.addEventListener('click',function(){goStep(parseInt(s.dataset.step));});});
+  document.querySelectorAll('select, input[type=text]').forEach(function(el){el.addEventListener('change',onChange);el.addEventListener('input',onChange);});
+  loadState();
+  updateSortBtns();
+  $('hero-count').textContent = DB_COUNT;
+  // 访问计数（CountAPI 免费服务，无需后端）
+  fetch('https://api.countapi.xyz/hit/kaoyan-chinese-lit-selector/visits')
+    .then(function(r) { return r.json(); })
+    .then(function(d) { $('visit-count').textContent = (d.value || 0).toLocaleString(); })
+    .catch(function() { $('visit-count').textContent = '---'; });
+  if(location.hash&&location.hash.length>1){
+    var p=new URLSearchParams(location.hash.substring(1));
+    ['bg','eng','qt','fr','rk','tm'].forEach(function(k){if(p.get(k))$('self-'+k).value=p.get(k);});
+    if(p.get('mj')) setChips('self-majors',p.get('mj').split(',').map(decodeURIComponent));
+    if(p.get('ft')) setChips('filter-tier',p.get('ft').split(',').map(decodeURIComponent));
+    if(p.get('frg')) setChips('filter-region',p.get('frg').split(',').map(decodeURIComponent));
+    (['fgrading','fscope','fwriting','fprotect','fstrategy','frank']).forEach(function(k){if(p.get(k))$(k.replace('f','filter-')).value=p.get(k);});
+    if(p.get('q')) $('filter-search').value=p.get('q');
+    saveState(); goStep(3);
+  }
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){closeCmp();closeDetail();}
+  });
+})();
+</script>
+</body>
+</html>
