@@ -359,7 +359,7 @@ var _hmt = _hmt || [];
     <div class="st"><div class="n" id="hero-count">132</div><div class="l">收录院校</div></div>
     <div class="st"><div class="n">7</div><div class="l">覆盖地区</div></div>
     <div class="st"><div class="n">A+→C-</div><div class="l">学科评估全覆盖</div></div>
-    <div class="st"><div class="n" id="visit-count">...</div><div class="l">累计使用人次</div></div>
+    <div class="st" id="visit-stat" style="display:none;"><div class="n" id="visit-count">0</div><div class="l">累计使用人次</div></div>
   </div>
 </div>
 
@@ -709,12 +709,12 @@ function saveState() {
     favs: favSet, favFilter: favFilterOn,
     compares: compareSet
   };
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch(e) {}
+  try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch(e) {}
 }
 
 function loadState() {
   try {
-    var raw = localStorage.getItem(STORAGE_KEY);
+    var raw = sessionStorage.getItem(STORAGE_KEY);
     if (!raw) return;
     var s = JSON.parse(raw);
     ['self-bg','self-eng','self-qtype','self-fear','self-risk','self-time','filter-ab','filter-scope','filter-writing','filter-protect','filter-strategy','filter-rank'].forEach(function(id) {
@@ -751,12 +751,12 @@ function setChips(id, vals) {
   });
 }
 
-function clearAll() { localStorage.removeItem(STORAGE_KEY); resetSelf(); resetFilters(); compareSet=[]; favSet=[]; favFilterOn=false; currentSort='score'; updateSortBtns(); updateCmpBar(); renderTargets(); document.body.classList.remove('dark'); updateThemeIcon(); renderQuiz(); goStep(1); }
+function clearAll() { sessionStorage.removeItem(STORAGE_KEY); resetSelf(); resetFilters(); compareSet=[]; favSet=[]; favFilterOn=false; currentSort='score'; updateSortBtns(); updateCmpBar(); renderTargets(); document.body.classList.remove('dark'); updateThemeIcon(); renderQuiz(); goStep(1); }
 
 function toggleTheme() { document.body.classList.toggle('dark'); updateThemeIcon(); saveState(); }
 function updateThemeIcon() { var b=$('theme-btn'); if(b)b.textContent=document.body.classList.contains('dark')?'☀️':'🌙'; }
 (function(){
-  try{var s=JSON.parse(localStorage.getItem(STORAGE_KEY));if(s&&s.dark)document.body.classList.add('dark');else if(window.matchMedia('(prefers-color-scheme:dark)').matches)document.body.classList.add('dark');}catch(e){}
+  try{var s=JSON.parse(sessionStorage.getItem(STORAGE_KEY));if(s&&s.dark)document.body.classList.add('dark');else if(window.matchMedia('(prefers-color-scheme:dark)').matches)document.body.classList.add('dark');}catch(e){}
   updateThemeIcon();
 })();
 
@@ -1672,8 +1672,8 @@ function showQuizResult() {
   // 访问计数（CountAPI 免费服务，无需后端）
   fetch('https://api.countapi.xyz/hit/kaoyan-chinese-lit-selector/visits')
     .then(function(r) { return r.json(); })
-    .then(function(d) { $('visit-count').textContent = (d.value || 0).toLocaleString(); })
-    .catch(function() { var el=$('visit-count'); if(el&&el.parentElement)el.parentElement.style.display='none'; });
+    .then(function(d) { $('visit-count').textContent = (d.value || 0).toLocaleString(); $('visit-stat').style.display=''; })
+    .catch(function() { $('visit-stat').style.display='none'; });
   if(location.hash&&location.hash.length>1){
     var p=new URLSearchParams(location.hash.substring(1));
     ['bg','eng','qt','fr','rk','tm'].forEach(function(k){if(p.get(k))$('self-'+k).value=p.get(k);});
