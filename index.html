@@ -465,6 +465,11 @@ var _hmt = _hmt || [];
     </div>
   </div>
   <div id="card-grid"></div>
+  <div id="donate-banner" style="display:none;text-align:center;padding:16px;margin-top:20px;background:linear-gradient(135deg,var(--accent-light),var(--gold-bg));border-radius:var(--radius);border:1px dashed var(--gold-border);cursor:pointer;" onclick="openDonate()">
+    <span style="font-size:15px;">🍍 觉得有用？</span>
+    <span style="font-size:13px;color:var(--accent);font-weight:600;">请开发者喝杯奶茶 ☕</span>
+    <span style="font-size:11px;color:var(--muted);display:block;margin-top:2px;">每一份支持都会让数据更准、功能更好</span>
+  </div>
 </div>
 </div>
 
@@ -1258,6 +1263,7 @@ function refresh() {
   $('hero-count').textContent = schools.length;
   showLowResultTip(schools.length);
   renderCards(schools);
+  if($('donate-banner')) $('donate-banner').style.display='block';
   // 宽松推荐：严格匹配少于15所时，展示放宽条件后的额外学校
   var relaxedEl = document.getElementById('relaxed-results');
   if (!relaxedEl) { relaxedEl = document.createElement('div'); relaxedEl.id = 'relaxed-results'; $('card-grid').after(relaxedEl); }
