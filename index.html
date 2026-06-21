@@ -408,7 +408,8 @@ body.dark .hero { background:linear-gradient(165deg,#2D2418 0%,#1E1B1A 35%,#261E
       <div class="form-group"><label>所在地区</label><div class="chip-group" id="filter-region"></div></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>公共课给分区</label><select id="filter-grading"><option value="">不限</option><option value="水区">🟢 水区（给分宽松）</option><option value="中等">🟡 中等</option><option value="旱区">🔴 旱区（压分严格）</option></select></div>
+      <div class="form-group"><label>考研A/B区</label><select id="filter-ab"><option value="">不限</option><option value="A">🅰️ A区（分数线较高，竞争大）</option><option value="B">🅱️ B区（分数线较低，含少数民族政策）</option></select>
+        <p style="font-size:10px;color:var(--muted);margin-top:3px;">学硕考<strong>英语一</strong>（难度＞英语二）；B区英语单科线低3-5分</p></div>
       <div class="form-group"><label>学科评估最低等级</label><select id="filter-rank"><option value="">不限</option><option value="A+">A+ 以上</option><option value="A">A 以上</option><option value="A-">A- 以上</option><option value="B+">B+ 以上</option><option value="B">B 以上</option></select></div>
     </div>
     <div class="form-row">
@@ -656,7 +657,7 @@ function saveState() {
     'self-fear': $('self-fear').value,
     'self-risk': $('self-risk').value,
     'self-time': $('self-time').value,
-    'filter-grading': $('filter-grading').value,
+    'filter-ab': $('filter-ab').value,
     'filter-scope': $('filter-scope').value,
     'filter-writing': $('filter-writing').value,
     'filter-protect': $('filter-protect').value,
@@ -680,7 +681,7 @@ function loadState() {
     var raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return;
     var s = JSON.parse(raw);
-    ['self-bg','self-eng','self-qtype','self-fear','self-risk','self-time','filter-grading','filter-scope','filter-writing','filter-protect','filter-strategy','filter-rank'].forEach(function(id) {
+    ['self-bg','self-eng','self-qtype','self-fear','self-risk','self-time','filter-ab','filter-scope','filter-writing','filter-protect','filter-strategy','filter-rank'].forEach(function(id) {
       if (s[id]) $(id).value = s[id];
     });
     if (s['filter-search']) $('filter-search').value = s['filter-search'];
@@ -777,15 +778,11 @@ function applySuggestions() {
   // 清除旧推荐
   document.querySelectorAll('#filter-tier .chip,#filter-region .chip').forEach(function(c){c.classList.remove('suggested');});
 
-  // 给分建议
-  var engMap = {'强':'水区','中':'水区','弱':'旱区','很弱':'旱区'}; // 相反：强→去水区赚分，弱→避开旱区
-  // 实际上：英语强→可以挑战旱区，英语弱→应该选水区
-  var engAdvice = {'强':null,'中':null,'弱':'水区','很弱':'水区'};
-  if(self.eng && engAdvice[self.eng]){
-    hints.push('英语'+(self.eng==='很弱'?'较':'偏')+'弱，推荐选择给分宽松的「水区」或「中等」');
-    document.querySelectorAll('#filter-region .chip').forEach(function(c){
-      // 不按地区推荐，而是在step2加给分建议
-    });
+  // A/B区建议：基于英语水平
+  if(self.eng==='弱'||self.eng==='很弱'){
+    hints.push('英语偏弱，推荐选择🅱️ B区（英语单科线低3-5分，竞争相对小）');
+  } else if(self.eng==='强'){
+    hints.push('英语有优势，🅰️ A区名校可以大胆冲');
   }
 
   // 考试恐惧建议
@@ -819,13 +816,13 @@ function applySuggestions() {
 
   // 给分区建议——高亮水区/中等给英语弱的用户
   if(self.eng==='弱'||self.eng==='很弱'){
-    document.querySelectorAll('#filter-grading option').forEach(function(o){
+    document.querySelectorAll('#filter-ab option').forEach(function(o){
       if(o.value==='水区'||o.value==='中等') o.dataset.suggested = '1';
     });
   }
   // 英语强→推荐旱区（有优势）
   if(self.eng==='强'){
-    document.querySelectorAll('#filter-grading option').forEach(function(o){
+    document.querySelectorAll('#filter-ab option').forEach(function(o){
       if(o.value==='旱区') o.dataset.suggested = '1';
     });
   }
@@ -853,7 +850,7 @@ function showLowResultTip(count) {
     el.classList.add('show');
     var tips = [];
     if(chipVals('filter-tier').length===0) tips.push('勾选「学校层次」缩小范围');
-    if(!document.getElementById('filter-grading').value) tips.push('试试不同的「给分区」');
+    if(!document.getElementById('filter-ab').value) tips.push('试试不同的「给分区」');
     el.innerHTML = '🔍 结果不多（'+count+'所），试试放宽筛选，或者：' + (tips.length>0?tips.join('，'):'查看更多选项');
   } else {
     el.classList.remove('show');
@@ -867,11 +864,24 @@ function resetSelf() {
 }
 function resetFilters() {
   document.querySelectorAll('#filter-tier input,#filter-region input').forEach(function(cb){cb.checked=false;cb.parentElement.classList.remove('active');});
-  ['filter-grading','filter-scope','filter-writing','filter-protect','filter-strategy','filter-rank'].forEach(function(id){$(id).value='';});
+  ['filter-ab','filter-scope','filter-writing','filter-protect','filter-strategy','filter-rank'].forEach(function(id){$(id).value='';});
   $('filter-search').value='';
   if (favFilterOn) { favFilterOn = false; $('fav-filter-btn').classList.remove('active'); $('fav-filter-btn').textContent = '⭐ 只看已收藏'; }
   saveState(); updateLive();
 }
+
+// ═══════════ A/B区映射 ═══════════
+var AB_MAP = {
+  '北京':'A','天津':'A','石家庄':'A','保定':'A','太原':'A','呼和浩特':'B',
+  '上海':'A','南京':'A','苏州':'A','徐州':'A','杭州':'A','金华':'A','合肥':'A','芜湖':'A','福州':'A','厦门':'A','泉州/厦门':'A','南昌':'A','济南':'A','青岛':'A','曲阜':'A','烟台':'A','扬州':'A','南通':'A','淮北':'A','安庆':'A','温州':'A','漳州':'A','南昌':'A','赣州':'A',
+  '郑州':'A','开封':'A','武汉':'A','长沙':'A','湘潭':'A','信阳':'A','黄石':'A','宜昌':'A','新乡':'A',
+  '广州':'A','深圳':'A','南宁':'B','桂林':'B','海口':'B',
+  '重庆':'A','成都':'A','贵阳':'B','昆明':'B','南充':'A',
+  '西安':'A','兰州':'B','西宁':'B','银川':'B','乌鲁木齐':'B','咸阳':'A','固原':'B',
+  '沈阳':'A','大连':'A','长春':'A','哈尔滨':'A','四平':'A','锦州':'A','延吉':'A',
+  '秦皇岛':'A','宁波':'A'
+};
+function getAB(school) { return AB_MAP[school.c] || 'A'; }
 
 // ═══════════ 评分 ═══════════
 function getVerify(s) {
@@ -955,7 +965,7 @@ function getSelf() {
 
 function doFilter(self) {
   var fTiers = chipVals('filter-tier'), fRegions = chipVals('filter-region');
-  var fG = $('filter-grading').value, fS = $('filter-scope').value;
+  var fG = $('filter-ab').value, fS = $('filter-scope').value;
   var fW = $('filter-writing').value, fP = $('filter-protect').value;
   var fSt = $('filter-strategy').value, fRk = $('filter-rank').value;
   var fQ = $('filter-search').value.trim().toLowerCase();
@@ -963,7 +973,7 @@ function doFilter(self) {
   return DB.filter(function(s){
     if(fTiers.length>0 && fTiers.indexOf(s.t)<0) return false;
     if(fRegions.length>0 && fRegions.indexOf(s.r)<0) return false;
-    if(fG && s.g!==fG) return false;
+    if(fG && getAB(s)!==fG) return false;
     if(fS && s.s!=='待核实' && s.s.indexOf(fS)<0) return false;
     if(fW==='有' && s.w!=='有' && s.w!=='待核实') return false;
     if(fW==='无' && s.w==='有') return false;
@@ -1101,7 +1111,7 @@ function openCmp(){
   if(compareSet.length<2){alert('请至少选2所');return;}
   var schools=DB.filter(function(s){return compareSet.indexOf(s.n)>=0;});
   var self=getSelf();
-  var rows=[{l:'层次',k:'t'},{l:'城市',k:'c'},{l:'地区',k:'r'},{l:'给分',k:'g'},{l:'学科评估',k:'rank'},{l:'考试范围',k:'s'},{l:'作文',k:'w'},{l:'科目',k:'exam'},{l:'招生',k:'enroll'},{l:'竞争',k:'comp'},{l:'保护一志愿',k:'protect'},{l:'复试淘汰',k:'reject'},{l:'匹配分',k:'_s'}];
+  var rows=[{l:'层次',k:'t'},{l:'城市',k:'c'},{l:'地区',k:'r'},{l:'考研区',k:'_ab'},{l:'给分区',k:'g'},{l:'学科评估',k:'rank'},{l:'考试范围',k:'s'},{l:'作文',k:'w'},{l:'科目',k:'exam'},{l:'招生',k:'enroll'},{l:'竞争',k:'comp'},{l:'保护一志愿',k:'protect'},{l:'复试淘汰',k:'reject'},{l:'匹配分',k:'_s'}];
   var h='<thead><tr><th>指标</th>';
   schools.forEach(function(s){h+='<th style="font-weight:700;">'+s.n+'</th>';});
   h+='</tr></thead><tbody>';
@@ -1110,6 +1120,7 @@ function openCmp(){
     schools.forEach(function(s){
       var v;
       if(r.k==='_s'){var sc=calcScore(s,self);v='<span style="font-weight:800;color:'+(sc>=70?'var(--green)':sc>=45?'#e67e22':'var(--red)')+';">'+sc+'分</span>';}
+      else if(r.k==='_ab'){v=getAB(s)==='A'?'🅰️ A区':'🅱️ B区';}
       else{v=s[r.k]||'-';if(r.k==='g')v=s.g==='旱区'?'🔴旱区':s.g==='水区'?'🟢水区':s.g==='中等'?'🟡中等':'❓';if(r.k==='w')v=s.w==='有'?'✍️有':s.w==='无'?'❌无':'❓';if(r.k==='protect')v=s.protect==='是'?'🛡️是':s.protect==='否'?'⚠️否':'❓';if(r.k==='reject')v=s.reject==='低'?'🟢低':s.reject==='中'?'🟡中':s.reject==='高'?'🔴高':'❓';}
       h+='<td>'+v+'</td>';
     });
@@ -1127,7 +1138,7 @@ function showDetail(name) {
   var self=getSelf(), sc=calcScore(s,self);
   $('detail-title').textContent=s.n;
   $('detail-body').innerHTML=
-    '<div class="ds"><h4>基本信息</h4><p>层次：<strong>'+s.t+'</strong> · 城市：'+s.c+' · 地区：'+s.r+' · 评估：<strong>'+s.rank+'</strong><br>数据可信度：<span class="verify-badge '+(VERIFY_CLASS[getVerify(s)]||'')+'">'+(VERIFY_LABELS[getVerify(s)]||'')+'</span></p></div>'+
+    '<div class="ds"><h4>基本信息</h4><p>层次：<strong>'+s.t+'</strong> · 城市：'+s.c+' · 地区：'+s.r+' · 考研区：<strong>'+(getAB(s)==='A'?'🅰️ A区':getAB(s)==='B'?'🅱️ B区':'')+'</strong> · 评估：<strong>'+s.rank+'</strong><br>数据可信度：<span class="verify-badge '+(VERIFY_CLASS[getVerify(s)]||'')+'">'+(VERIFY_LABELS[getVerify(s)]||'')+'</span></p></div>'+
     '<div class="ds"><h4>考试</h4><p>范围：'+s.s+' | 作文：'+s.w+'<br>科目：'+s.exam+'<br>招生：'+s.enroll+' | 竞争：'+s.comp+'</p></div>'+
     '<div class="ds"><h4>录取风格</h4><p>一志愿保护：'+(s.protect||'?')+' | 复试淘汰：'+(s.reject||'?')+'</p></div>'+
     '<div class="ds"><h4>匹配评分</h4><p style="font-size:20px;font-weight:800;color:'+(sc>=70?'var(--green)':sc>=45?'#e67e22':'var(--red)')+';">'+sc+' / 100</p></div>'+
@@ -1232,7 +1243,7 @@ function renderCards(schools) {
     var hints = [];
     if (chipVals('filter-tier').length > 0) hints.push('试试勾选更多「学校层次」');
     if (chipVals('filter-region').length === 1) hints.push('「所在地区」只选了1个，可以多加几个');
-    if ($('filter-grading').value) hints.push('「给分区」筛选可以改为不限');
+    if ($('filter-ab').value) hints.push('「A/B区」筛选可以改为不限');
     if ($('filter-scope').value) hints.push('「考试范围」筛选可以改为不限');
     if ($('filter-rank').value && $('filter-rank').value.indexOf('A')>=0) hints.push('「学科评估」等级可以放低到B+或B');
     if ($('filter-protect').value) hints.push('「保护一志愿」筛选可以改为不限');
@@ -1281,7 +1292,8 @@ function renderCards(schools) {
         '<div class="tags">'+
           '<span class="tag">📍 '+s.c+' · '+s.r+'</span>'+
           '<span class="tag">'+s.s+'</span>'+
-          '<span class="tag '+(s.g==='旱区'?'dry':s.g==='水区'?'wet':'')+'">'+(s.g==='旱区'?'🔴':s.g==='水区'?'🟢':'🟡')+' '+s.g+'</span>'+
+          '<span class="tag">'+(getAB(s)==='A'?'🅰️ A区':getAB(s)==='B'?'🅱️ B区':'')+'</span>'+
+          '<span class="tag '+(s.g==='旱区'?'dry':s.g==='水区'?'wet':'')+'">'+(s.g==='旱区'?'🔴旱区':s.g==='水区'?'🟢水区':'🟡中等')+'</span>'+
           (s.w==='有'?'<span class="tag writing">✍️ 考作文</span>':'')+
           (s.s==='待核实'?'<span class="tag" style="background:#fff3cd;">⚠️ 待核实</span>':'')+
           (s.protect==='是'?'<span class="tag" style="background:#d4edda;color:#155724;">🛡️ 保护一志愿</span>':'')+
@@ -1332,7 +1344,7 @@ function copyLink() {
   if(self.time) parts.push('tm='+encodeURIComponent(self.time));
   var ft=chipVals('filter-tier'); if(ft.length) parts.push('ft='+ft.map(encodeURIComponent).join(','));
   var frg=chipVals('filter-region'); if(frg.length) parts.push('frg='+frg.map(encodeURIComponent).join(','));
-  ['filter-grading','filter-scope','filter-writing','filter-protect','filter-strategy','filter-rank'].forEach(function(id){
+  ['filter-ab','filter-scope','filter-writing','filter-protect','filter-strategy','filter-rank'].forEach(function(id){
     var v=$(id).value; if(v) parts.push(id.replace('filter-','f')+'='+encodeURIComponent(v));
   });
   var q=$('filter-search').value.trim(); if(q) parts.push('q='+encodeURIComponent(q));
@@ -1517,7 +1529,7 @@ function showQuizResult() {
     if(p.get('mj')) setChips('self-majors',p.get('mj').split(',').map(decodeURIComponent));
     if(p.get('ft')) setChips('filter-tier',p.get('ft').split(',').map(decodeURIComponent));
     if(p.get('frg')) setChips('filter-region',p.get('frg').split(',').map(decodeURIComponent));
-    (['fgrading','fscope','fwriting','fprotect','fstrategy','frank']).forEach(function(k){if(p.get(k))$(k.replace('f','filter-')).value=p.get(k);});
+    (['fab','fscope','fwriting','fprotect','fstrategy','frank']).forEach(function(k){if(p.get(k))$(k.replace('f','filter-')).value=p.get(k);});
     if(p.get('q')) $('filter-search').value=p.get('q');
     saveState(); goStep(3);
   }
