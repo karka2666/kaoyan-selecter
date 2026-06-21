@@ -392,7 +392,9 @@ var _hmt = _hmt || [];
     <div class="quiz-result" id="quiz-result"></div>
   </div>
   <div class="card"><h3>🎯 报考方向与偏好</h3>
-    <div class="form-group" style="margin-bottom:14px;"><label>想考的方向（可多选）</label><div class="chip-group" id="self-majors"></div></div>
+    <div class="form-group" style="margin-bottom:14px;"><label>想考的方向（可多选，点击查看解释）</label><div class="chip-group" id="self-majors"></div>
+      <div class="major-help" id="major-help" style="display:none;margin-top:8px;padding:10px 14px;background:var(--accent-light);border-radius:var(--radius-sm);font-size:12px;color:var(--text);line-height:1.7;"></div>
+    </div>
     <div class="form-row">
       <div class="form-group"><label>最擅长的题型</label><select id="self-qtype"><option value="">请选择</option><option value="背诵">📖 背诵默写型</option><option value="论述">📝 分析论述型</option><option value="写作">✍️ 学术写作型</option><option value="说不上来">🤷 说不上来</option></select></div>
       <div class="form-group"><label>考试恐惧</label><select id="self-fear"><option value="">请选择</option><option value="怕语言学">😰 怕语言学</option><option value="怕作文">😰 怕作文/文学评论</option><option value="怕大综合">😰 怕大综合（范围太广）</option><option value="都不怕">💪 都不怕</option></select></div>
@@ -661,6 +663,15 @@ var DB_COUNT = DB.length;
 var TIERS = ["985","211","双一流","双非"];
 var REGIONS = ["华东","华北","华南","华中","西南","西北","东北"];
 var MAJORS = ["文艺学","中国古典文献学","中国古代文学","中国现当代文学","比较文学与世界文学","中国语言文学（大类）"];
+// 方向通俗解释
+var MAJOR_HELP = {
+  "文艺学":"研究文学的本质、原理和规律。偏理论思辨，追问'文学是什么'。适合喜欢哲学、美学、逻辑推理的同学。毕业多去高校或研究机构。",
+  "中国古典文献学":"整理、校勘、研究古籍文献。偏考据功夫，跟古书打交道。适合细心、坐得住、喜欢'考古'的同学。冷门但稀缺，竞争相对小。",
+  "中国古代文学":"研究先秦到清末的诗词歌赋、小说戏曲。偏赏析和文学史。适合喜欢唐诗宋词、古典小说、对古代文化有感情的同学。就业面最广（教师、编辑、公务员）。",
+  "中国现当代文学":"研究五四至今的现代文学和当代作品。贴近当下，鲁迅、张爱玲、莫言都在这个范围。适合关注现实、喜欢现代小说的同学。",
+  "比较文学与世界文学":"跨越国界和语言研究文学关系。需要一定外语能力，读外国作品和理论。适合喜欢外国文学、有跨文化视野的同学。",
+  "中国语言文学（大类）":"部分学校不区分具体方向，按一级学科统一招生、入学后再分方向。不确定选哪个可以先选这个。"
+};
 // 简称映射：用户选旧名称或DB用简称时双向兼容
 var MAJOR_ALIAS = {"古代文学":"中国古代文学","现当代文学":"中国现当代文学","比较文学":"比较文学与世界文学","文献学":"中国古典文献学"};
 var rankOrder = ["A+","A","A-","B+","B","B-","C+","C","C-"];
@@ -1641,6 +1652,15 @@ function showQuizResult() {
   renderChips('filter-region', REGIONS);
   document.querySelectorAll('.step').forEach(function(s){s.addEventListener('click',function(){goStep(parseInt(s.dataset.step));});});
   document.querySelectorAll('select, input[type=text]').forEach(function(el){el.addEventListener('change',onChange);el.addEventListener('input',onChange);});
+  // 方向解释：hover/点击芯片显示
+  $('self-majors').addEventListener('click',function(e){
+    var chip=e.target.closest('.chip'); if(!chip) return;
+    var cb=chip.querySelector('input'); if(!cb) return;
+    var mj=cb.value; var help=MAJOR_HELP[mj];
+    var helEl=$('major-help');
+    if(help){helEl.style.display='block';helEl.innerHTML='<strong>'+mj+'</strong>：'+help;}
+    else{helEl.style.display='none';}
+  });
   loadState();
   updateSortBtns();
   $('hero-count').textContent = DB_COUNT;
