@@ -425,7 +425,7 @@ var _hmt = _hmt || [];
     </div>
     <div class="form-row">
       <div class="form-group"><label>考试范围</label><select id="filter-scope"><option value="">不限</option><option value="小综合">📖 小综合（只考文学，范围窄但考得细）</option><option value="大综合">📚 大综合（文学+语言学，范围广但多数学校深度一般）</option></select>
-        <p style="font-size:10px;color:var(--muted);margin-top:3px;line-height:1.6;">💡 <strong>大综合</strong>：背的多，但大部分学校考得不深；⚠️ 南大、北师大等个别985对深度也有要求。<br>💡 <strong>小综合</strong>：范围窄，但可能考得很细；顶尖学校对学术深度要求更高。</p></div>
+        <p style="font-size:10px;color:var(--muted);margin-top:3px;line-height:1.6;">💡 <strong>大综合</strong>：背的多，但大部分学校考得不深；⚠️ 南大、北师大等个别985对深度也有要求。<br>💡 <strong>小综合</strong>：范围窄，但可能考得很细；顶尖学校对学术深度要求更高。<br><span style="color:var(--accent);">⚠️ 以上只是道理上的大致规律，具体到每所学校差异很大，请以考试科目为准。</span></p></div>
       <div class="form-group"><label>是否考作文/论文</label><select id="filter-writing"><option value="">不限</option><option value="有">✍️ 有写作</option><option value="无">❌ 不考作文</option></select></div>
     </div>
     <div class="form-row">
@@ -961,40 +961,37 @@ function getStrategy(school, self) {
 var STRATEGY_LABELS = { '冲':'🔴 冲刺', '稳':'🟡 稳妥', '保':'🟢 保底' };
 var STRATEGY_CLASS = { '冲':'s-chong', '稳':'s-wen', '保':'s-bao' };
 function calcScore(school, self) {
-  var total = 0;
   var bgR = {'985':5,'211':4,'双非一本':3,'二本':2,'专升本':1}[self.bg]||0;
   var tR = {'985':5,'211':4,'双一流':3,'双非':2}[school.t]||2;
   var gap = tR - bgR;
-  total += gap <= 0 ? 30 : gap === 1 ? 22 : gap === 2 ? 14 : gap === 3 ? 7 : 3;
+  var tierScore = gap <= 0 ? 30 : gap === 1 ? 22 : gap === 2 ? 14 : gap === 3 ? 7 : 3;
   var engR = {'强':5,'中':3,'弱':2,'很弱':1}[self.eng]||0;
-  if(engR>=5) total += school.g==='旱区'?15:(school.g==='水区'?20:18);
-  else if(engR>=3) total += school.g==='旱区'?10:(school.g==='水区'?18:15);
-  else if(engR>=2) total += school.g==='旱区'?5:(school.g==='水区'?12:8);
-  else total += school.g==='旱区'?0:(school.g==='水区'?8:5);
-  if(school.g==='待核实') total += 8;
-  var ss = 20;
-  if(self.fear==='怕语言学' && school.s.indexOf('大综合')>=0) ss=5;
-  else if(self.fear==='怕大综合' && school.s.indexOf('大综合')>=0) ss=5;
-  else if(self.fear==='怕作文' && school.w==='有') ss=5;
-  else if(!self.fear||self.fear==='都不怕') ss=20; else ss=15;
-  total += ss;
-  var qs = 10;
-  if(self.qtype==='背诵' && (school.s.indexOf('小综合')>=0||school.s==='待核实')) qs=15;
-  else if(self.qtype==='写作' && school.w==='有') qs=15;
-  else if(self.qtype==='论述') qs=13;
-  if(self.qtype==='写作' && school.w!=='有' && school.w!=='待核实') qs=5;
-  total += qs;
-  var ts = 10;
-  if(self.time==='全职') ts=15;
-  else if(self.time==='半职') ts=school.s.indexOf('大综合')>=0?10:13;
-  else if(self.time==='在职') ts=school.s.indexOf('大综合')>=0?4:8;
-  total += ts;
-  var tierS=tierScore, engS=engScore, scopeS=scopeScore, qtypeS=qtypeScore, timeS=timeScore;
+  var engScore;
+  if(engR>=5) engScore = school.g==='旱区'?15:(school.g==='水区'?20:18);
+  else if(engR>=3) engScore = school.g==='旱区'?10:(school.g==='水区'?18:15);
+  else if(engR>=2) engScore = school.g==='旱区'?5:(school.g==='水区'?12:8);
+  else engScore = school.g==='旱区'?0:(school.g==='水区'?8:5);
+  if(school.g==='待核实') engScore = 8;
+  var scopeScore = 20;
+  if(self.fear==='怕语言学' && school.s.indexOf('大综合')>=0) scopeScore=5;
+  else if(self.fear==='怕大综合' && school.s.indexOf('大综合')>=0) scopeScore=5;
+  else if(self.fear==='怕作文' && school.w==='有') scopeScore=5;
+  else if(!self.fear||self.fear==='都不怕') scopeScore=20; else scopeScore=15;
+  var qtypeScore = 10;
+  if(self.qtype==='背诵' && (school.s.indexOf('小综合')>=0||school.s==='待核实')) qtypeScore=15;
+  else if(self.qtype==='写作' && school.w==='有') qtypeScore=15;
+  else if(self.qtype==='论述') qtypeScore=13;
+  if(self.qtype==='写作' && school.w!=='有' && school.w!=='待核实') qtypeScore=5;
+  var timeScore = 10;
+  if(self.time==='全职') timeScore=15;
+  else if(self.time==='半职') timeScore=school.s.indexOf('大综合')>=0?10:13;
+  else if(self.time==='在职') timeScore=school.s.indexOf('大综合')>=0?4:8;
+  var total = tierScore + engScore + scopeScore + qtypeScore + timeScore;
   var score = Math.round(total), riskAdj=0;
   if(self.risk==='冲名校' && (school.t==='985'||school.t==='211')) {riskAdj=8;score=Math.min(100,score+8);}
   if(self.risk==='上岸就行' && (school.t==='985'||school.t==='211')) {riskAdj=-5;score=Math.max(0,score-5);}
   if(self.risk==='上岸就行' && school.t==='双非') {riskAdj=5;score=Math.min(100,score+5);}
-  school._detail={tier:tierS,eng:engS,scope:scopeS,qtype:qtypeS,time:timeS,risk:riskAdj,total:score};
+  school._detail={tier:tierScore,eng:engScore,scope:scopeScore,qtype:qtypeScore,time:timeScore,risk:riskAdj,total:score};
   return score;
 }
 
