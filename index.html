@@ -1345,34 +1345,53 @@ function refresh() {
     if (re) re.innerHTML = '';
   }
 
-  // 保底推荐：严格+宽松之后仍不足时，基于纯背景推荐（忽略所有筛选）
-  var totalCount = schools.length + (relaxed?relaxed.length:0);
-  if (totalCount < 9) {
+  // 智能补全：确保冲稳保梯度各至少有一所
+  var totalCount = schools.length + (typeof relaxed !== 'undefined' ? relaxed.length : 0);
+  // 检查当前结果是否覆盖了冲稳保三个梯度
+  var hasChong = false, hasWen = false, hasBao = false;
+  for (var si=0;si<schools.length;si++) {
+    var stg = schools[si].strategy;
+    if (stg==='冲') hasChong=true;
+    else if (stg==='稳') hasWen=true;
+    else if (stg==='保') hasBao=true;
+  }
+  var missing = !hasChong || !hasWen || !hasBao;
+  // 当结果很少或梯度不全时，从全库补学校（忽略所有筛选，仅基于背景评分）
+  if (totalCount < 9 || missing) {
     var allNames = {}; for (var ai=0;ai<schools.length;ai++) allNames[schools[ai].n]=true;
-    if (relaxed) for (var ri3=0;ri3<relaxed.length;ri3++) allNames[relaxed[ri3].n]=true;
-    var fallback = DB.map(function(s){ s.score=calcScore(s,self); s.strategy=getStrategy(s,self); return s; })
-      .filter(function(s){ return !allNames[s.n]; })
+    if (typeof relaxed !== 'undefined') for (var ri3=0;ri3<relaxed.length;ri3++) allNames[relaxed[ri3].n]=true;
+    // 全库评分排序
+    var allScored = DB.map(function(s){ s.score=calcScore(s,self); s.strategy=getStrategy(s,self); return s; })
       .sort(function(a,b){ return b.score-a.score; });
-    // 取冲稳保各3所
+    // 从每个缺失的梯度各取最高分的一所
     var fbResult = [];
     var fbCount = { '冲':0, '稳':0, '保':0 };
-    for (var fi=0;fi<fallback.length && fbResult.length<3;fi++) {
-      var stg = fallback[fi].strategy;
-      if (fbCount[stg] < 1) { fbResult.push(fallback[fi]); fbCount[stg]++; }
+    var needed = { '冲':(!hasChong?1:0), '稳':(!hasWen?1:0), '保':(!hasBao?1:0) };
+    for (var fi=0;fi<allScored.length;fi++) {
+      var stg2 = allScored[fi].strategy;
+      if (allNames[allScored[fi].n]) continue; // 已在主结果/宽松结果中
+      if (needed[stg2] > 0) {
+        fbResult.push(allScored[fi]);
+        allNames[allScored[fi].n] = true;
+        needed[stg2]--;
+      }
+      if (needed['冲']<=0 && needed['稳']<=0 && needed['保']<=0) break;
     }
     if (fbResult.length > 0) {
-      var fbh = '<div style="margin-top:12px;padding-top:12px;border-top:1px dotted var(--border);">'+
-        '<div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--muted);">💡 筛选条件较严格？基于你的背景评估，这些学校也值得一看</div>';
+      var fbh = '<div style="margin-top:12px;padding-top:12px;border-top:2px dashed var(--accent);">'+
+        '<div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--accent);">🎯 智能补全 · 冲稳保各至少一所</div>'+
+        '<div style="font-size:11px;color:var(--muted);margin-bottom:8px;">当前筛选下梯度不完整，以下基于你的背景评估补充推荐（忽略筛选条件）</div>';
       for (var fbi=0;fbi<fbResult.length;fbi++) {
         var fs = fbResult[fbi];
         var fcolor = fs.score>=70?'var(--green)':fs.score>=45?'#e67e22':'var(--red)';
         var fscCls = fs.strategy==='冲'?'s-chong':fs.strategy==='稳'?'s-wen':'s-bao';
-        fbh += '<div class="school-card" style="opacity:.8;border-left-width:2px;">'+
+        fbh += '<div class="school-card" style="opacity:.88;border-left-width:2px;border-left-color:var(--accent);">'+
           '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">'+
             '<span><span class="sname" onclick="showDetail(\''+fs.n.replace(/'/g,"\\'")+'\')">'+fs.n+'</span>'+
             '<span class="tier-badge '+(fs.t==='985'?'t985':fs.t==='211'?'t211':fs.t==='双一流'?'tsyl':'tsf')+'" style="margin-left:4px;">'+fs.t+'</span>'+
-            '<span class="strategy-badge '+fscCls+'">'+fs.strategy+'</span></span>'+
-            '<span style="font-weight:800;font-size:12px;color:'+fcolor+';">'+fs.score+'分</span>'+
+            '<span class="strategy-badge '+fscCls+'">'+fs.strategy+'</span>'+
+            '<span style="font-size:10px;color:var(--accent);margin-left:2px;">补充推荐</span></span>'+
+            '<span style="font-weight:800;font-size:13px;color:'+fcolor+';">'+fs.score+'分</span>'+
           '</div></div>';
       }
       fbh += '</div>';
