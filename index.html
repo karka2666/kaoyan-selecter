@@ -419,8 +419,12 @@ var _hmt = _hmt || [];
       <div class="form-group"><label>所在地区</label><div class="chip-group" id="filter-region"></div></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>考研A/B区</label><select id="filter-ab"><option value="">不限</option><option value="A">🅰️ A区（分数线较高，竞争大）</option><option value="B">🅱️ B区（分数线较低，含少数民族政策）</option></select>
-        <p style="font-size:10px;color:var(--muted);margin-top:3px;">学硕考<strong>英语一</strong>（难度＞英语二）；B区英语单科线低3-5分</p></div>
+      <div class="form-group"><label>考研A/B区 <span style="font-size:10px;color:var(--accent);cursor:pointer;font-weight:400;" onclick="var el=document.getElementById('ab-help');el.style.display=el.style.display==='none'?'block':'none';">[?] 点击查看详情</span></label><select id="filter-ab"><option value="">不限</option><option value="A">🅰️ A区 · 21省（分数线高5-10分）</option><option value="B">🅱️ B区 · 10省（分数线低，英语单科低3-5分）</option></select>
+        <div id="ab-help" style="display:none;font-size:10px;color:var(--muted);margin-top:4px;padding:8px 12px;background:var(--chip-bg);border-radius:8px;line-height:1.8;">
+        <strong>🅰️ A区（21省）</strong>：北京、天津、河北、山西、辽宁、吉林、黑龙江、上海、江苏、浙江、安徽、福建、江西、山东、河南、湖北、湖南、广东、重庆、四川、陕西<br>
+        <strong>🅱️ B区（10省）</strong>：内蒙古、广西、海南、贵州、云南、西藏、甘肃、青海、宁夏、新疆<br>
+        <span style="color:var(--accent);">💡 区别不仅是英语单科线差3-5分——B区多为西部/边疆省份，高校数量少、竞争压力小，但学术资源和就业机会也相对有限。如果英语偏弱或求稳上岸，B区是值得考虑的选择。</span>
+        </div></div>
       <div class="form-group"><label>学科评估最低等级</label><select id="filter-rank"><option value="">不限</option><option value="A+">A+ 以上</option><option value="A">A 以上</option><option value="A-">A- 以上</option><option value="B+">B+ 以上</option><option value="B">B 以上</option></select></div>
     </div>
     <div class="form-row">
